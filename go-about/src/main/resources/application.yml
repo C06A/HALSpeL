@@ -1,0 +1,9 @@
+---
+micronaut:
+  application:
+    name: go-about
+
+---
+micronaut:
+  metrics:
+    enabled: true

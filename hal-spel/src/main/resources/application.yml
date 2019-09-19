@@ -1,0 +1,9 @@
+---
+micronaut:
+  application:
+    name: hal-spel
+
+---
+micronaut:
+  metrics:
+    enabled: true
