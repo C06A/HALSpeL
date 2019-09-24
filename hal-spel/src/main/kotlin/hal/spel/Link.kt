@@ -2,40 +2,29 @@ package hal.spel
 
 import com.github.kittinunf.fuel.*
 import com.github.kittinunf.fuel.core.*
-import com.github.kittinunf.fuel.jackson.jacksonDeserializerOf
 import com.helpchoice.kotlin.koton.KotON
-import com.helpchoice.kotlin.koton.kotON
 import io.micronaut.http.uri.UriTemplate
 import java.io.File
 
+data class Link(val kotON: KotON<Any>?) {
 
-data class Link(val kjson: KotON<Any>?) {
-    constructor(href: String, type: String? = null, templated: Boolean? = null) : this(
-            kotON {
-                "href" to href
-                templated?.let {
-                    "templated" to it
-                }
-                "type" to (type ?: "application/hal+json")
-            })
-
-    val href: String? = kjson?.let {
+    val href: String? = kotON?.let {
         it<String>("href")
     }
 
-    val type: String? = kjson?.let {
+    val type: String? = kotON?.let {
         it<String>("type")
     }
 
-    val templated: Boolean = kjson?.let {
+    val templated: Boolean = kotON?.let {
         it<Boolean>("templated")
     } ?: false
 
-    val name: String? = kjson?.let {
+    val name: String? = kotON?.let {
         it<String>("name")
     }
 
-    val description: String? = kjson?.let {
+    val description: String? = kotON?.let {
         it<String>("description")
     }
 
