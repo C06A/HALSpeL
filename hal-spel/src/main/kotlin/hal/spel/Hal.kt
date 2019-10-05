@@ -289,6 +289,10 @@ class Answer(
     }
 }
 
+operator fun Headers.plus(header: Pair<String, String>): Headers {
+    return append(header.first, header.second)
+}
+
 fun halSpeL(href: String, type: String? = null, templated: Boolean? = null): Link {
     return Link(
     kotON {

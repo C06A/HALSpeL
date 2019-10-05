@@ -4,10 +4,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     application
     id("io.spring.dependency-management") version "1.0.6.RELEASE"
-    id("org.jetbrains.kotlin.jvm") version "1.3.21"
-    id("org.jetbrains.kotlin.kapt") version "1.3.21"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.3.21"
-    id("com.github.johnrengelman.shadow") version "4.0.2"
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.kotlin.kapt")
+    id("org.jetbrains.kotlin.plugin.allopen")
+    id("com.github.johnrengelman.shadow")
 }
 
 version = "0.1"

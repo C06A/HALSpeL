@@ -1,8 +1,6 @@
 package go.about
 
-import com.github.kittinunf.fuel.core.Headers
 import com.github.kittinunf.fuel.core.extensions.cUrlString
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import fuel.spel.configAsHostnameVerifier
 import fuel.spel.configSslTrust
