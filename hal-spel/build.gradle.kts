@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import kotlin.script.experimental.api.asSuccess
 
 plugins {
     application
@@ -10,7 +11,7 @@ plugins {
     id("com.github.johnrengelman.shadow")
 }
 
-version = "0.2"
+version = "0.3"
 group = "hal.spel"
 
 val kotlinVersion: String by project
@@ -99,4 +100,23 @@ val test: Test by tasks
 test.apply {
     useJUnitPlatform()
 //test.classpath += configurations.developmentOnly
+}
+
+val sourcesJar = task<Jar>("sourcesJar") {
+    group = "build"
+
+    archiveClassifier.set("sources")
+    from(sourceSets["main"].allSource)
+}
+
+val javadocJar = task<Jar>("javadocJar") {
+    group = "build"
+
+    archiveClassifier.set("javadoc")
+    from(tasks["javadoc"])
+}
+
+artifacts {
+    add("archives", sourcesJar)
+    add("archives", javadocJar)
 }

@@ -34,7 +34,7 @@ data class Link(val kotON: KotON<Any>?) {
         return url(mapOf(*params))
     }
 
-    fun url(params: Map<String, Any?>): String {
+    fun url(params: Map<String, Any?>?): String {
         return if (templated) {
             UriTemplate(href).expand(params)
         } else {
@@ -50,7 +50,7 @@ data class Link(val kotON: KotON<Any>?) {
         return GET(params.toMap(), headers)
     }
 
-    fun GET(params: Map<String, Any?>, headers: Headers? = null): Answer {
+    fun GET(params: Map<String, Any?>?, headers: Headers?): Answer {
         return Answer(
                 communicate(params, headers = headers) { httpGet() }
         )
@@ -151,7 +151,7 @@ data class Link(val kotON: KotON<Any>?) {
     }
 
     private inline fun communicate(
-            params: Map<String, Any?>
+            params: Map<String, Any?>?
             , headers: Headers? = null
             , request: String.() -> Request): ResponseResultOf<String> {
         try {
