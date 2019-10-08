@@ -4,6 +4,7 @@ import kotlin.script.experimental.api.asSuccess
 
 plugins {
     application
+    maven
     id("io.spring.dependency-management") version "1.0.6.RELEASE"
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.kotlin.kapt")
@@ -11,7 +12,7 @@ plugins {
     id("com.github.johnrengelman.shadow")
 }
 
-version = "0.3"
+version = "1.0"
 group = "hal.spel"
 
 val kotlinVersion: String by project
@@ -119,4 +120,25 @@ val javadocJar = task<Jar>("javadocJar") {
 artifacts {
     add("archives", sourcesJar)
     add("archives", javadocJar)
+}
+
+task("writeNewPom") {
+    group = "build"
+
+    doLast {
+        maven.pom {
+            withGroovyBuilder {
+                "project" {
+                    setProperty("inceptionYear", "2019")
+                    "licenses" {
+                        "license" {
+                            setProperty("name", "The Apache Software License, Version 2.0")
+                            setProperty("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+                            setProperty("distribution", "repo")
+                        }
+                    }
+                }
+            }
+        }.writeTo("$buildDir/libs/${project.name}-${version}.pom")
+    }
 }

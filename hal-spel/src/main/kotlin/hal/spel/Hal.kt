@@ -16,33 +16,69 @@ const val RESOURCES = "_embedded"
 
 private val SIMPLE_ASPECT: Link.(Link.() -> Answer) -> Answer = { it() }
 
-
+/**
+ * This method retrieves the Resource from the main entry point formed in Link.
+ * <p/>
+ * It expends the Link if it is a template, passes the function to submit request to the server to the aspect function,
+ * passes the Answer it returns to the tail and returns the Resource resulting from all that.
+ *
+ * @param params -- key-value pairs to substitutes placeholders in the Link template
+ * @param headers -- a collections of Headers to submit with the request
+ * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+ * @param tail -- the post-processing for single request
+ * @return the Resource returned by the server
+ */
 fun Link.FETCH(
         vararg params: Pair<String, Any?>
         , headers: Headers? = null
         , aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
-        , handler: (Answer.() -> Unit)? = null
+        , tail: (Answer.() -> Unit)? = null
 ): Resource {
-    return FETCH(params.toMap(), headers, aspect, handler)
+    return FETCH(params.toMap(), headers, aspect, tail)
 }
 
+/**
+ * This method retrieves the Resource from the main entry point formed in Link.
+ * <p/>
+ * It expends the Link if it is a template, passes the function to submit request to the server to the aspect function,
+ * passes the Answer it returns to the tail and returns the Resource resulting from all that.
+ *
+ * @param params -- key-value Map to substitutes placeholders in the Link template
+ * @param headers -- a collections of Headers to submit with the request
+ * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+ * @param tail -- the post-processing for single request
+ * @return the Resource returned by the server
+ */
 fun Link.FETCH(
         params: Map<String, Any?>
         , headers: Headers? = null
         , aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
-        , handler: (Answer.() -> Unit)? = null
+        , tail: (Answer.() -> Unit)? = null
 ): Resource {
     val answer = aspect {
         GET(params, headers = headers)
     }
-    handler?.let {
-        answer.handler()
+    tail?.let {
+        answer.tail()
     }
     return answer().let {
         Resource(it, aspect)
     }
 }
 
+/**
+ * This method submits the Resource to the main entry point formed in Link.
+ * <p/>
+ * It expends the Link if it is a template, passes the function to submit request to the server to the aspect function,
+ * passes the Answer it returns to the handler and returns the Resource resulting from all that.
+ *
+ * @param params -- key-value pairs to substitutes placeholders in the Link template
+ * @param headers -- a collections of Headers to submit with the request
+ * @param body -- the definition of the new Resource to be created
+ * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+ * @param tail -- the post-processing for single request
+ * @return the Resource returned by the server
+ */
 fun Link.CREATE(
         vararg params: Pair<String, Any?>
         , headers: Headers?
@@ -53,6 +89,19 @@ fun Link.CREATE(
     return CREATE(params.toMap(), headers, body, aspect, tail)
 }
 
+/**
+ * This method submits the Resource to the main entry point formed in Link.
+ * <p/>
+ * It expends the Link if it is a template, passes the function to submit request to the server to the aspect function,
+ * passes the Answer it returns to the handler and returns the Resource resulting from all that.
+ *
+ * @param params -- key-value pairs to substitutes placeholders in the Link template
+ * @param headers -- a collections of Headers to submit with the request
+ * @param body -- the definition of the new Resource to be created
+ * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+ * @param tail -- the post-processing for single request
+ * @return the Resource returned by the server
+ */
 fun Link.CREATE(
         params: Map<String, Any?>
         , headers: Headers?
@@ -71,6 +120,15 @@ fun Link.CREATE(
     } ?: null
 }
 
+/**
+ * This represents the server Resource referenced by REST endpoint.
+ * <p/>
+ * There is no need to create an instance of Resource, just use one returned by server.
+ * <p/>
+ * The Resource returns attribute value when addressed with square brackets.
+ * <p/>
+ * Calling Resource with label in parenthesis returns the referenced embedded Resource.
+ */
 class Resource(
         val koton: KotON<Any>
         , var aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
@@ -104,6 +162,9 @@ class Resource(
         }
     }
 
+    /**
+     * The String representation of the Resource includes the labels it contained grouped by References, Resources and Attributes.
+     */
     override fun toString(): String {
         return """
             |${mutableListOf("References:").also { it.addAll(references) }.joinToString("\n\t")}
@@ -127,21 +188,63 @@ class Resource(
         } ?: null
     }
 
+    /**
+     * This fetches the Resource from the server pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to retrieve the Resource from. No label will reload current Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun FETCH(link: String? = null, vararg params: Pair<String, Any?>, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return FETCH(link, params.toMap(), headers, aspect, tail)
     }
 
+    /**
+     * This fetches the Resource from the server pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to retrieve the Resource from. No label will reload current Resource
+     * @param params -- key-value Map to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun FETCH(link: String? = null, params: Map<String, Any?>, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self").FETCH(params, headers = headers, aspect = aspect, handler = tail)
+        return getLink(link ?: "self").FETCH(params, headers = headers, aspect = aspect, tail = tail)
     }
 
+    /**
+     * This submits the Resource to the server pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param body -- the definition of the new Resource to be created
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun CREATE(link: String, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, params.toMap(), body, headers, aspect, tail)
     }
 
+    /**
+     * This submits the Resource to the server pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value Map to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param body -- the definition of the new Resource to be created
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun CREATE(link: String, params: Map<String, Any?>, body: String, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return getLink(link)
@@ -150,6 +253,18 @@ class Resource(
                 ?: Resource(kotON())
     }
 
+    /**
+     * This submits dynamically created Resource to the server pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value Map to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param body -- the function to dynamically create new Resources to pass to the server
+     * @param length -- the function, providing the length of the created body
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun CREATE(link: String, params: Map<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return getLink(link)
@@ -158,6 +273,17 @@ class Resource(
                 ?: Resource(kotON())
     }
 
+    /**
+     * This replaces the Resource on the server pointed by the reference in this Resource with new provided definition.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param body -- the definition of the new Resources to pass to the server
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun REPLACE(link: String, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
                 , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return getLink(link)
@@ -166,6 +292,18 @@ class Resource(
                 ?: Resource(kotON())
     }
 
+    /**
+     * This replaces the Resource on the server pointed by the reference in this Resource with new provided definition.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param body -- the function to dynamically create new Resources to pass to the server
+     * @param length -- the function, providing the length of the created body
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun REPLACE(link: String, vararg params: Pair<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
                 , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return getLink(link)
@@ -174,11 +312,33 @@ class Resource(
                 ?: Resource(kotON())
     }
 
+    /**
+     * This uploads the File to the server as new Resource pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param file -- the File definition to be uploaded
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun CREATE(link: String, vararg params: Pair<String, Any?>, file: File, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, *params, files = mapOf(file.name to file), headers = headers, aspect = aspect, tail = tail)
     }
 
+    /**
+     * This uploads the Collection of Files to the server as new Resources pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param files -- a Collection of File definitions to be uploaded
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun CREATE(link: String, vararg params: Pair<String, Any?>, files: Collection<File>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, *params, files = files.map {
@@ -186,6 +346,17 @@ class Resource(
         }.toMap(), headers = headers, aspect = aspect, tail = tail)
     }
 
+    /**
+     * This uploads the Collection of Files to the server as new Resources pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param files -- a Map of File name to File definition to be uploaded
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun CREATE(link: String, vararg params: Pair<String, Any?>, files: Map<String, File>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
 //        return PLACE(link, params.toMap(), files, tail)
@@ -198,6 +369,17 @@ class Resource(
                 ?: Resource(kotON())
     }
 
+    /**
+     * This updates provided fields in the Resource on the server pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param body -- the definition of fields in the Resources to update
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun UPDATE(link: String, params: Map<String, Any?> = emptyMap(), body: String, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return getLink(link)
@@ -206,6 +388,17 @@ class Resource(
                 ?: Resource(kotON())
     }
 
+    /**
+     * This downloads the File from the server pointed by the reference in this Resource to the local folder.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param folder -- to download the File into
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun FETCH(link: String, params: Map<String, Any?> = emptyMap(), folder: File, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return getLink(link)
@@ -214,6 +407,16 @@ class Resource(
                 ?: Resource(kotON())
     }
 
+    /**
+     * This deletes the Resource pointed by the reference in this Resource from the server.
+     * <p/>
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun REMOVE(link: String, params: Map<String, Any?> = emptyMap(), headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return getLink(link)
@@ -223,6 +426,9 @@ class Resource(
     }
 }
 
+/**
+ * This is a wrapper around connection resulting Object to simplify access to the Request, Responce and Result objects.
+ */
 class Answer(
         private val exchange: ResponseResultOf<String>
 ) {

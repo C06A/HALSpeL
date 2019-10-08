@@ -6,6 +6,10 @@ import com.helpchoice.kotlin.koton.KotON
 import io.micronaut.http.uri.UriTemplate
 import java.io.File
 
+/**
+ * This class provides low level access to HTTP protocol
+ *
+ */
 data class Link(val kotON: KotON<Any>?) {
 
     val href: String? = kotON?.let {
