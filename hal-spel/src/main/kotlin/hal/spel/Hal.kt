@@ -81,7 +81,7 @@ fun Link.FETCH(
  */
 fun Link.CREATE(
         vararg params: Pair<String, Any?>
-        , headers: Headers?
+        , headers: Headers? = null
         , body: String = ""
         , aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
         , tail: (Answer.() -> Unit)? = null
@@ -103,8 +103,8 @@ fun Link.CREATE(
  * @return the Resource returned by the server
  */
 fun Link.CREATE(
-        params: Map<String, Any?>
-        , headers: Headers?
+        params: Map<String, Any?> = emptyMap()
+        , headers: Headers? = null
         , body: String = ""
         , aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
         , tail: (Answer.() -> Unit)? = null
@@ -175,7 +175,7 @@ class Resource(
 
     private fun getLink(rel: String, index: Int? = null): Link {
         val links = koton[ACTIONS]
-        val json = links[rel]
+        val json = index?.let { links[rel][index] } ?: links[rel]
         return Link(json)
     }
 
@@ -192,6 +192,22 @@ class Resource(
      * This fetches the Resource from the server pointed by the reference in this Resource.
      * <p/>
      * @param link -- the label of the reference to retrieve the Resource from. No label will reload current Resource
+     * @param index -- location of the link in the collection
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
+    fun FETCH(link: String? = null, index: Int? = null, vararg params: Pair<String, Any?>, headers: Headers? = null
+              , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+        return FETCH(link, index, params.toMap(), headers, aspect, tail)
+    }
+
+    /**
+     * This fetches the Resource from the server pointed by the reference in this Resource.
+     * <p/>
+     * @param link -- the label of the reference to retrieve the Resource from. No label will reload current Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
      * @param aspect -- the function to pass to all follow request to define pre- and post- processing
@@ -200,7 +216,7 @@ class Resource(
      */
     fun FETCH(link: String? = null, vararg params: Pair<String, Any?>, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return FETCH(link, params.toMap(), headers, aspect, tail)
+        return FETCH(link, null, params.toMap(), headers, aspect, tail)
     }
 
     /**
@@ -213,9 +229,9 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun FETCH(link: String? = null, params: Map<String, Any?>, headers: Headers? = null
+    fun FETCH(link: String? = null, index: Int? = null, params: Map<String, Any?>, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self").FETCH(params, headers = headers, aspect = aspect, tail = tail)
+        return getLink(link ?: "self", index).FETCH(params, headers = headers, aspect = aspect, tail = tail)
     }
 
     /**
@@ -441,17 +457,17 @@ class Answer(
     val result
         get() = exchange.third
 
-    val body: Map<String, Any?>?
+    val body: Any?
         get() {
             val (success, failure) = result
             return success?.let {
                 try {
-                    Gson().fromJson<Map<String, Any?>>(it, Map::class.java) as Map<String, Any?>
+                    Gson().fromJson<Any?>(it, Any::class.java)
                 } catch (e: Exception) {
                     throw InvalidPropertiesFormatException(e)
                 }
             } ?: failure?.let {
-                Gson().fromJson(String(failure.errorData), Map::class.java) as Map<String, Any?>
+                Gson().fromJson(String(failure.errorData), Any::class.java)
             }
         }
 
@@ -495,8 +511,8 @@ class Answer(
     }
 }
 
-operator fun Headers.plus(header: Pair<String, String>): Headers {
-    return append(header.first, header.second)
+operator fun Headers.plus(header: Pair<String, String>?): Headers {
+    return header?.let { append(header.first, header.second) } ?: this
 }
 
 fun halSpeL(href: String, type: String? = null, templated: Boolean? = null): Link {

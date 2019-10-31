@@ -5,32 +5,32 @@ import com.github.kittinunf.fuel.core.*
 import com.helpchoice.kotlin.koton.KotON
 import io.micronaut.http.uri.UriTemplate
 import java.io.File
+import java.util.*
 
 /**
  * This class provides low level access to HTTP protocol
  *
  */
-data class Link(val kotON: KotON<Any>?) {
-
-    val href: String? = kotON?.let {
-        it<String>("href")
-    }
-
-    val type: String? = kotON?.let {
-        it<String>("type")
-    }
-
-    val templated: Boolean = kotON?.let {
-        it<Boolean>("templated")
-    } ?: false
-
-    val name: String? = kotON?.let {
-        it<String>("name")
-    }
-
-    val description: String? = kotON?.let {
-        it<String>("description")
-    }
+data class Link(
+        val href: String
+        , val templated: Boolean? = null
+        , val type: String? = null
+        , val description: String? = null
+        , val name: String? = null
+        , val profile: String? = null
+        , val title: String? = null
+        , val hreflang: Locale? = null
+) {
+    constructor(kotON: KotON<Any>) : this(
+            kotON["href"]<String>() ?: throw Exception("")
+            , kotON<Boolean>("templated")
+            , kotON<String>("type")
+            , kotON<String>("description")
+            , kotON<String>("name")
+            , kotON<String>("profile")
+            , kotON<String>("title")
+            , kotON<Locale>("hreflang")
+    )
 
     private var parameters = mutableMapOf<String, Any?>()
 
@@ -39,7 +39,7 @@ data class Link(val kotON: KotON<Any>?) {
     }
 
     fun url(params: Map<String, Any?>?): String {
-        return if (templated) {
+        return if (templated ?: false) {
             UriTemplate(href).expand(params)
         } else {
             href
@@ -71,7 +71,9 @@ data class Link(val kotON: KotON<Any>?) {
     fun POST(params: Map<String, Any?>, headers: Headers? = null, body: String): Answer {
         return Answer(
                 communicate(params, headers = headers) {
-                    httpPost().body(body)
+                    httpPost().run {
+                        body?.let { body(body) } ?: this
+                    }
                 }
         )
     }
@@ -159,12 +161,18 @@ data class Link(val kotON: KotON<Any>?) {
             , headers: Headers? = null
             , request: String.() -> Request): ResponseResultOf<String> {
         try {
+            val updatedHeaders =
+                    type?.let {
+                        (headers ?: Headers()).run {
+                            this + (!containsKey(Headers.ACCEPT)).OnlyIfTrue { Headers.ACCEPT to type }
+                        }
+                    } ?: headers
             return url(params)
                     .request()
                     .also {
                         it.executionOptions.allowRedirects = false
                         //                    it.headers.clear()
-                        headers?.apply {
+                        updatedHeaders?.apply {
                             it.headers.putAll(this)
                         }
                     }
@@ -174,5 +182,13 @@ data class Link(val kotON: KotON<Any>?) {
             println(e.localizedMessage)
             throw e
         }
+    }
+}
+
+fun <R> Boolean.OnlyIfTrue(op: () -> R): R? {
+    return if (this) {
+        op()
+    } else {
+        null
     }
 }
