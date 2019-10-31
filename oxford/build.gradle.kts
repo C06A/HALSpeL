@@ -1,10 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import kotlin.script.experimental.api.asSuccess
 
 plugins {
     application
-    maven
     kotlin("jvm")
     kotlin("kapt")
     id("io.spring.dependency-management")
@@ -12,15 +10,15 @@ plugins {
     id("com.github.johnrengelman.shadow")
 }
 
-version = "1.0.1"
-group = "hal.spel"
+version = "0.1"
+group = "oxford"
 
 val kotlinVersion: String by project
 val flue_version: String by project
 
 repositories {
     mavenCentral()
-    jcenter()
+    maven("https://jcenter.bintray.com")
 }
 
 dependencyManagement {
@@ -47,9 +45,14 @@ dependencies {
     compile("io.micronaut.configuration:micronaut-picocli")
     compile("io.micronaut:micronaut-http-server-netty")
 
+    compile(project(":fuel-spel"))
+    compile(project(":hal-spel"))
+
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")
     kaptTest("io.micronaut:micronaut-inject-java")
+
+    implementation("com.google.code.gson:gson:2.8.5")
 
     runtime("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     runtime("ch.qos.logback:logback-classic:1.2.3")
@@ -60,20 +63,10 @@ dependencies {
     testCompile("io.micronaut.test:micronaut-test-junit5")
     testRuntime("org.junit.jupiter:junit-jupiter-engine")
     testRuntime("org.jetbrains.spek:spek-junit-platform-engine:1.1.5")
-
-    compile("com.github.kittinunf.fuel:fuel:$flue_version") //for JVM
-    compile("com.github.kittinunf.fuel:fuel-gson:$flue_version") //for json support
-    compile("com.github.kittinunf.fuel:fuel-jackson:$flue_version") //for json support
-
-    compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
-
-    implementation("com.google.code.gson:gson:2.8.5")
-
-    compile("com.helpchoice.kotlin:koton:1.1.5")
 }
 
 application {
-    mainClassName = "hal.spel.Application"
+    mainClassName = "oxford.Application"
 }
 
 allOpen {
@@ -86,7 +79,7 @@ shadowJar.mergeServiceFiles()
 tasks.withType(KotlinCompile::class) {
     kotlinOptions {
         jvmTarget = "1.8"
-//Will retain parameter names for Java reflection
+        //Will retain parameter names for Java reflection
         javaParameters = true
     }
 }
@@ -102,44 +95,4 @@ val test: Test by tasks
 test.apply {
     useJUnitPlatform()
 //test.classpath += configurations.developmentOnly
-}
-
-val sourcesJar = task<Jar>("sourcesJar") {
-    group = "build"
-
-    archiveClassifier.set("sources")
-    from(sourceSets["main"].allSource)
-}
-
-val javadocJar = task<Jar>("javadocJar") {
-    group = "build"
-
-    archiveClassifier.set("javadoc")
-    from(tasks["javadoc"])
-}
-
-artifacts {
-    add("archives", sourcesJar)
-    add("archives", javadocJar)
-}
-
-task("writeNewPom") {
-    group = "build"
-
-    doLast {
-        maven.pom {
-            withGroovyBuilder {
-                "project" {
-                    setProperty("inceptionYear", "2019")
-                    "licenses" {
-                        "license" {
-                            setProperty("name", "The Apache Software License, Version 2.0")
-                            setProperty("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
-                            setProperty("distribution", "repo")
-                        }
-                    }
-                }
-            }
-        }.writeTo("$buildDir/libs/${project.name}-${version}.pom")
-    }
 }

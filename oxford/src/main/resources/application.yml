@@ -1,0 +1,9 @@
+---
+micronaut:
+  application:
+    name: oxford
+
+---
+micronaut:
+  metrics:
+    enabled: true

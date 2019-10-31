@@ -1,0 +1,5 @@
+profile: service
+defaultPackage: oxford
+---
+testFramework: junit
+sourceLanguage: kotlin

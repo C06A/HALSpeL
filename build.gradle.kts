@@ -2,10 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    id("org.jetbrains.kotlin.jvm") version "1.3.50"
-    id("org.jetbrains.kotlin.kapt") version "1.3.50"
+    kotlin("jvm") version "1.3.50"
+    kotlin("kapt") version "1.3.50"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.3.50"
     id("com.github.johnrengelman.shadow") version "4.0.2"
+    id("io.spring.dependency-management") version "1.0.6.RELEASE"
 }
 
 version = "0.3"

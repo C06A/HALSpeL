@@ -3,9 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     application
-    id("io.spring.dependency-management") version "1.0.6.RELEASE"
-    id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.kotlin.kapt")
+    kotlin("jvm")
+    kotlin("kapt")
+    id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.plugin.allopen")
     id("com.github.johnrengelman.shadow")
 }
