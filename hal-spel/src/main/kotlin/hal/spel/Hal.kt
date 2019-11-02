@@ -457,18 +457,20 @@ class Answer(
     val result
         get() = exchange.third
 
-    val body: Any?
+    val body: KotON<Any>?
         get() {
             val (success, failure) = result
-            return success?.let {
-                try {
-                    Gson().fromJson<Any?>(it, Any::class.java)
-                } catch (e: Exception) {
-                    throw InvalidPropertiesFormatException(e)
-                }
-            } ?: failure?.let {
-                Gson().fromJson(String(failure.errorData), Any::class.java)
-            }
+            return kotON(
+                    success?.let {
+                        try {
+                            Gson().fromJson<Any?>(it, Any::class.java)
+                        } catch (e: Exception) {
+                            throw InvalidPropertiesFormatException(e)
+                        }
+                    } ?: failure?.let {
+                        Gson().fromJson(String(failure.errorData), Any::class.java)
+                    } ?: ""
+            )
         }
 
     val error: FuelError?
@@ -483,13 +485,7 @@ class Answer(
         }
 
     operator fun invoke(): KotON<Any> {
-        return try {
-            body?.let {
-                kotON(it)
-            } ?: kotON { "" }
-        } catch (e: InvalidPropertiesFormatException) {
-            kotON(result.getAs<String>() ?: "")
-        } // { null }
+        return body ?: kotON { "" }
     }
 
     fun HttpStatus.getMessage(): String {
@@ -517,11 +513,11 @@ operator fun Headers.plus(header: Pair<String, String>?): Headers {
 
 fun halSpeL(href: String, type: String? = null, templated: Boolean? = null): Link {
     return Link(
-    kotON {
-        "href" to href
-        templated?.let {
-            "templated" to it
-        }
-        "type" to (type ?: "application/hal+json")
-    })
+            kotON {
+                "href" to href
+                templated?.let {
+                    "templated" to it
+                }
+                "type" to (type ?: "application/hal+json")
+            })
 }

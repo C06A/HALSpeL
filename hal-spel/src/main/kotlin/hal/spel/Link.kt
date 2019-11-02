@@ -34,6 +34,19 @@ data class Link(
 
     private var parameters = mutableMapOf<String, Any?>()
 
+    fun toMap(): Map<String, Any?> {
+        return mapOf(
+                "href" to href
+                , "templated" to templated
+                , "type" to type
+                , "description" to description
+                , "name" to name
+                , "profile" to profile
+                , "title" to title
+                , "hreflang" to hreflang
+        )
+    }
+
     fun url(vararg params: Pair<String, Any?>): String {
         return url(mapOf(*params))
     }
