@@ -18,7 +18,7 @@ private val SIMPLE_ASPECT: Link.(Link.() -> Answer) -> Answer = { it() }
 
 /**
  * This method retrieves the Resource from the main entry point formed in Link.
- * <p/>
+ *
  * It expends the Link if it is a template, passes the function to submit request to the server to the aspect function,
  * passes the Answer it returns to the tail and returns the Resource resulting from all that.
  *
@@ -39,7 +39,7 @@ fun Link.FETCH(
 
 /**
  * This method retrieves the Resource from the main entry point formed in Link.
- * <p/>
+ *
  * It expends the Link if it is a template, passes the function to submit request to the server to the aspect function,
  * passes the Answer it returns to the tail and returns the Resource resulting from all that.
  *
@@ -68,7 +68,7 @@ fun Link.FETCH(
 
 /**
  * This method submits the Resource to the main entry point formed in Link.
- * <p/>
+ *
  * It expends the Link if it is a template, passes the function to submit request to the server to the aspect function,
  * passes the Answer it returns to the handler and returns the Resource resulting from all that.
  *
@@ -91,7 +91,7 @@ fun Link.CREATE(
 
 /**
  * This method submits the Resource to the main entry point formed in Link.
- * <p/>
+ *
  * It expends the Link if it is a template, passes the function to submit request to the server to the aspect function,
  * passes the Answer it returns to the handler and returns the Resource resulting from all that.
  *
@@ -122,11 +122,11 @@ fun Link.CREATE(
 
 /**
  * This represents the server Resource referenced by REST endpoint.
- * <p/>
+ *
  * There is no need to create an instance of Resource, just use one returned by server.
- * <p/>
+ *
  * The Resource returns attribute value when addressed with square brackets.
- * <p/>
+ *
  * Calling Resource with label in parenthesis returns the referenced embedded Resource.
  */
 class Resource(
@@ -190,7 +190,7 @@ class Resource(
 
     /**
      * This fetches the Resource from the server pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to retrieve the Resource from. No label will reload current Resource
      * @param index -- location of the link in the collection
      * @param params -- key-value pairs to substitutes placeholders in the Link template
@@ -206,7 +206,7 @@ class Resource(
 
     /**
      * This fetches the Resource from the server pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to retrieve the Resource from. No label will reload current Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -221,7 +221,7 @@ class Resource(
 
     /**
      * This fetches the Resource from the server pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to retrieve the Resource from. No label will reload current Resource
      * @param params -- key-value Map to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -236,7 +236,7 @@ class Resource(
 
     /**
      * This submits the Resource to the server pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -252,7 +252,7 @@ class Resource(
 
     /**
      * This submits the Resource to the server pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value Map to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -271,7 +271,7 @@ class Resource(
 
     /**
      * This submits dynamically created Resource to the server pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value Map to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -291,7 +291,7 @@ class Resource(
 
     /**
      * This replaces the Resource on the server pointed by the reference in this Resource with new provided definition.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -310,7 +310,7 @@ class Resource(
 
     /**
      * This replaces the Resource on the server pointed by the reference in this Resource with new provided definition.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -330,7 +330,7 @@ class Resource(
 
     /**
      * This uploads the File to the server as new Resource pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -346,7 +346,7 @@ class Resource(
 
     /**
      * This uploads the Collection of Files to the server as new Resources pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -364,7 +364,7 @@ class Resource(
 
     /**
      * This uploads the Collection of Files to the server as new Resources pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -387,7 +387,7 @@ class Resource(
 
     /**
      * This updates provided fields in the Resource on the server pointed by the reference in this Resource.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -406,7 +406,7 @@ class Resource(
 
     /**
      * This downloads the File from the server pointed by the reference in this Resource to the local folder.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request
@@ -425,7 +425,7 @@ class Resource(
 
     /**
      * This deletes the Resource pointed by the reference in this Resource from the server.
-     * <p/>
+     *
      * @param link -- the label of the reference to point to the Resource
      * @param params -- key-value pairs to substitutes placeholders in the Link template
      * @param headers -- a collections of Headers to submit with the request

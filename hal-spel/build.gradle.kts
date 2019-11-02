@@ -1,8 +1,11 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import kotlin.script.experimental.api.asSuccess
 
 plugins {
+    val dokka_version = "0.10.0"
+
     application
     maven
     kotlin("jvm")
@@ -10,6 +13,7 @@ plugins {
     id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.plugin.allopen")
     id("com.github.johnrengelman.shadow")
+    id("org.jetbrains.dokka") version dokka_version
 }
 
 version = "1.0.1"
@@ -111,18 +115,6 @@ val sourcesJar = task<Jar>("sourcesJar") {
     from(sourceSets["main"].allSource)
 }
 
-val javadocJar = task<Jar>("javadocJar") {
-    group = "build"
-
-    archiveClassifier.set("javadoc")
-    from(tasks["javadoc"])
-}
-
-artifacts {
-    add("archives", sourcesJar)
-    add("archives", javadocJar)
-}
-
 task("writeNewPom") {
     group = "build"
 
@@ -142,4 +134,18 @@ task("writeNewPom") {
             }
         }.writeTo("$buildDir/libs/${project.name}-${version}.pom")
     }
+}
+
+val dokka : DokkaTask by tasks
+dokka.apply {
+    outputFormat = "html"
+    outputDirectory = "$buildDir/dokka"
+}
+
+val dokkadocJar = task<Jar>("dokkadocJar") {
+    dependsOn(dokka)
+    group = "build"
+
+    classifier = "javadoc"
+    from(dokka.outputDirectory)
 }
