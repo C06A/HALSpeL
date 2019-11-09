@@ -245,7 +245,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun CREATE(link: String, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
+    fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, body: KotON<*>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, params.toMap(), body, headers, aspect, tail)
     }
@@ -261,10 +261,10 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun CREATE(link: String, params: Map<String, Any?>, body: String, headers: Headers? = null
+    fun CREATE(link: String? = null, params: Map<String, Any?>, body: KotON<*>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link)
-                .aspect { POST(params, headers = headers, body = body) }
+        return getLink(link ?: "self")
+                .aspect { POST(params, headers = headers, body = body.toJson()) }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -281,9 +281,9 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun CREATE(link: String, params: Map<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
+    fun CREATE(link: String? = null, params: Map<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link)
+        return getLink(link ?: "self")
                 .aspect { POST(params, headers = headers, source = source, length = length) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -300,10 +300,10 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun REPLACE(link: String, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
+    fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, body: KotON<*>, headers: Headers? = null
                 , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link)
-                .aspect { PUT(*params, headers = headers, body = body) }
+        return getLink(link ?: "self")
+                .aspect { PUT(*params, headers = headers, body = body.toJson()) }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -320,9 +320,9 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun REPLACE(link: String, vararg params: Pair<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
+    fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
                 , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link)
+        return getLink(link ?: "self")
                 .aspect { PUT(*params, headers = headers, source = source, length = length) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -339,7 +339,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun CREATE(link: String, vararg params: Pair<String, Any?>, file: File, headers: Headers? = null
+    fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, file: File, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, *params, files = mapOf(file.name to file), headers = headers, aspect = aspect, tail = tail)
     }
@@ -355,7 +355,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun CREATE(link: String, vararg params: Pair<String, Any?>, files: Collection<File>, headers: Headers? = null
+    fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, files: Collection<File>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, *params, files = files.map {
             it.name to it
@@ -373,13 +373,13 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun CREATE(link: String, vararg params: Pair<String, Any?>, files: Map<String, File>, headers: Headers? = null
+    fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, files: Map<String, File>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
 //        return PLACE(link, params.toMap(), files, tail)
 //    }
 //
 //    fun PLACE(link: String, params: Map<String, Any?>, files: Map<String, File>, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link)
+        return getLink(link ?: "self")
                 .aspect { UPLOAD(*params, headers = headers, files = files) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -396,10 +396,10 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun UPDATE(link: String, params: Map<String, Any?> = emptyMap(), body: String, headers: Headers? = null
+    fun UPDATE(link: String? = null, params: Map<String, Any?> = emptyMap(), body: KotON<*>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link)
-                .aspect { PATCH(headers = headers, body = body) }
+        return getLink(link ?: "self")
+                .aspect { PATCH(headers = headers, body = body.toJson()) }
                 .execute(tail)
                 ?: Resource(kotON())
     }

@@ -16,7 +16,7 @@ plugins {
     id("org.jetbrains.dokka") version dokka_version
 }
 
-version = "1.2.0"
+version = "1.2.1"
 group = "hal.spel"
 
 val kotlinVersion: String by project
