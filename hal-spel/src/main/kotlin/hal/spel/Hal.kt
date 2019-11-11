@@ -1,6 +1,9 @@
 package hal.spel
 
+import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.*
+import com.github.kittinunf.fuel.core.extensions.cUrlString
+import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.getAs
 import io.micronaut.http.HttpStatus
 import java.io.File
@@ -8,6 +11,7 @@ import java.lang.IllegalArgumentException
 import com.google.gson.Gson
 import com.helpchoice.kotlin.koton.KotON
 import com.helpchoice.kotlin.koton.kotON
+import io.micronaut.http.MediaType
 import java.lang.Exception
 import java.util.*
 
@@ -149,16 +153,22 @@ class Resource(
         inline get() = koton<Map<String, Any>>(RESOURCES)?.keys ?: emptySet()
 
     val attributes: Collection<String>
-        inline get() = koton<Map<String, Any>>()?.run {
-            keys - ACTIONS - RESOURCES
-        } ?: emptySet()
+        inline get() = koton().run {
+            when (this) {
+                is Map<*, *> -> (this as Map<String, Any>).run {
+                    keys - ACTIONS - RESOURCES
+                } ?: emptyList()
+                is Collection<*> -> this as Collection<String>
+                else -> emptyList()
+            }
+        }
 
     inline operator fun get(index: Int): KotON<Any> = koton[index]
 
-    inline operator fun get(rel: String): KotON<Any> {
+    inline operator fun get(rel: String, vararg path: String): KotON<Any> {
         return when (rel) {
             ACTIONS, RESOURCES -> throw IllegalArgumentException("There are no attribute with name '$rel'")
-            else -> koton[rel]
+            else -> koton.get(rel, *path)
         }
     }
 
@@ -245,6 +255,22 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    fun CREATE(link: String, vararg params: Pair<String, Any?>, body: KotON<Any>, headers: Headers? = null
+               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+        return CREATE(link, params.toMap(), body.toJson(), headers, aspect, tail)
+    }
+
+    /**
+     * This submits the Resource to the server pointed by the reference in this Resource.
+     *
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param body -- the definition of the new Resource to be created
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
     fun CREATE(link: String, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, params.toMap(), body, headers, aspect, tail)
@@ -287,6 +313,22 @@ class Resource(
                 .aspect { POST(params, headers = headers, source = source, length = length) }
                 .execute(tail)
                 ?: Resource(kotON())
+    }
+
+    /**
+     * This replaces the Resource on the server pointed by the reference in this Resource with new provided definition.
+     *
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param body -- the definition of the new Resources to pass to the server
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
+    fun REPLACE(link: String, vararg params: Pair<String, Any?>, body: KotON<*>, headers: Headers? = null
+                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+        return REPLACE(link, *params, body = body.toJson(), headers = headers, aspect = aspect, tail = tail)
     }
 
     /**
@@ -383,6 +425,22 @@ class Resource(
                 .aspect { UPLOAD(*params, headers = headers, files = files) }
                 .execute(tail)
                 ?: Resource(kotON())
+    }
+
+    /**
+     * This updates provided fields in the Resource on the server pointed by the reference in this Resource.
+     *
+     * @param link -- the label of the reference to point to the Resource
+     * @param params -- key-value pairs to substitutes placeholders in the Link template
+     * @param headers -- a collections of Headers to submit with the request
+     * @param body -- the definition of fields in the Resources to update
+     * @param aspect -- the function to pass to all follow request to define pre- and post- processing
+     * @param tail -- the post-processing for single request
+     * @return the Resource returned by the server
+     */
+    fun UPDATE(link: String, params: Map<String, Any?> = emptyMap(), body: KotON<*>, headers: Headers? = null
+               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+        return UPDATE(link, params, body.toJson(), Headers() + (Headers.ACCEPT to MediaType.APPLICATION_HAL_JSON), aspect, tail)
     }
 
     /**
