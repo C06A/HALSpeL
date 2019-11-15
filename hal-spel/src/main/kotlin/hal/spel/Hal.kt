@@ -271,7 +271,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun CREATE(link: String, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
+    fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, params.toMap(), body, headers, aspect, tail)
     }
