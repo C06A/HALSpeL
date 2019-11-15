@@ -2,9 +2,7 @@ package fuel.spel
 
 import java.security.cert.X509Certificate
 import javax.net.ssl.*
-
-class FuelSpeL {
-}
+import com.github.kittinunf.fuel.core.FuelManager
 
 /**
  * Configure SSL Certificates management.
@@ -32,4 +30,14 @@ inline fun String.configSslTrust(trustManagers: Array<TrustManager>? = null) {
  */
 inline fun HostnameVerifier?.configAsHostnameVerifier() {
     HttpsURLConnection.setDefaultHostnameVerifier(this ?: HostnameVerifier { _, _ -> true })
+}
+
+/**
+ * Sets default headers to submit JSON and expect HAL
+ */
+inline fun setDefaultHeaders() {
+    FuelManager.instance.baseHeaders = mapOf(
+            "Accept" to "application/hal+json"
+            , "Content-Type" to "application/json"
+    )
 }
