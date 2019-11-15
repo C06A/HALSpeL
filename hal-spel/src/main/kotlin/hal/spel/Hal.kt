@@ -13,7 +13,9 @@ import com.helpchoice.kotlin.koton.KotON
 import com.helpchoice.kotlin.koton.kotON
 import io.micronaut.http.MediaType
 import java.lang.Exception
+import java.lang.NullPointerException
 import java.util.*
+import kotlin.math.max
 
 const val ACTIONS = "_links"
 const val RESOURCES = "_embedded"
@@ -176,10 +178,43 @@ class Resource(
      * The String representation of the Resource includes the labels it contained grouped by References, Resources and Attributes.
      */
     override fun toString(): String {
+        val internals = koton<Map<String, Any>>() ?: emptyMap()
+        val refCount = references.fold(0) { count, key ->
+            max(count, key.length)
+        }
+        val refs = references.map {
+            val placeholders = koton[ACTIONS, it, "href"]<String>()
+                    ?.split("{")
+                    ?.drop(1)
+                    ?.map {
+                        it.split(Regex("}"), 2)[0]
+                    }
+            "${it.padEnd(refCount)} ${placeholders.nullIfEmpty()?.joinToString(", ", "[ ", " ]") ?: ""}"
+        }
+
+        val resCount = resources.fold(0) { count, key ->
+            max(count, key.length)
+        }
+        val reses = resources.map {
+            nullIfNeeded {
+                val sub = koton[RESOURCES, it]()
+                "${it.padEnd(resCount)} ${if(sub is Collection<*>) "[${sub.size}]" else ""}"
+            }
+        }.filterNotNull()
+
+        val attCount = attributes.fold(0) { count, key ->
+            max(count, key.length)
+        }
+        val atts = attributes.map {
+            nullIfNeeded {
+                "${it.padEnd(attCount)} ${koton[it].toJson()}"
+            }
+        }.filterNotNull()
+
         return """
-            |${mutableListOf("References:").also { it.addAll(references) }.joinToString("\n\t")}
-            |${mutableListOf("Resources:").also { it.addAll(resources) }.joinToString("\n\t")}
-            |${mutableListOf("Attributes:").also { it.addAll(attributes) }.joinToString("\n\t")}
+            |${mutableListOf("References:").also { it.addAll(refs) }.joinToString("\n\t")}
+            |${mutableListOf("Resources:").also { it.addAll(reses) }.joinToString("\n\t")}
+            |${mutableListOf("Attributes:").also { it.addAll(atts) }.joinToString("\n\t")}
         """.trimMargin()
     }
 
@@ -582,3 +617,13 @@ fun halSpeL(href: String, type: String? = null, templated: Boolean? = null): Lin
                 "type" to (type ?: "application/hal+json")
             })
 }
+
+fun <V> nullIfNeeded(lambda: () -> V): V? {
+    try {
+        return lambda()
+    } catch (e: NullPointerException) {
+        return null
+    }
+}
+
+fun Collection<*>?.nullIfEmpty() = if(this.isNullOrEmpty()) null else this
