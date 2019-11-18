@@ -178,7 +178,6 @@ class Resource(
      * The String representation of the Resource includes the labels it contained grouped by References, Resources and Attributes.
      */
     override fun toString(): String {
-        val internals = koton<Map<String, Any>>() ?: emptyMap()
         val refCount = references.fold(0) { count, key ->
             max(count, key.length)
         }
@@ -437,7 +436,7 @@ class Resource(
      */
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, file: File, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return CREATE(link, *params, files = mapOf(file.name to file), headers = headers, aspect = aspect, tail = tail)
+        return CREATE(link, *params, files = mapOf(file to file.name), headers = headers, aspect = aspect, tail = tail)
     }
 
     /**
@@ -454,7 +453,7 @@ class Resource(
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, files: Collection<File>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, *params, files = files.map {
-            it.name to it
+            it to it.name
         }.toMap(), headers = headers, aspect = aspect, tail = tail)
     }
 
@@ -469,7 +468,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, files: Map<String, File>, headers: Headers? = null
+    fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, files: Map<File, String>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
 //        return PLACE(link, params.toMap(), files, tail)
 //    }

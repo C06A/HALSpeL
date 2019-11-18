@@ -131,7 +131,7 @@ data class Link(
         )
     }
 
-    fun UPLOAD(vararg params: Pair<String, Any?>, headers: Headers? = null, files: Map<String, File>): Answer {
+    fun UPLOAD(vararg params: Pair<String, Any?>, headers: Headers? = null, files: Map<File, String>): Answer {
 //        return UPLOAD(params.toMap(), headers, files)
 //    }
 //
@@ -141,7 +141,7 @@ data class Link(
                     httpUpload()
                             .add(
                                     *(files.map { (key, value) ->
-                                        FileDataPart(value, key, value.name)
+                                        FileDataPart(key, value)
                                     }).toTypedArray()
                             )
                 }
