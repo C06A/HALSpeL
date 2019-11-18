@@ -528,9 +528,9 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun REMOVE(link: String, params: Map<String, Any?> = emptyMap(), headers: Headers? = null
+    fun REMOVE(link: String? = null, params: Map<String, Any?> = emptyMap(), headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link)
+        return getLink(link ?: "self")
                 .aspect { DELETE(headers = headers) }
                 .execute(tail)
                 ?: Resource(kotON())
