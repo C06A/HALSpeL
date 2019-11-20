@@ -197,7 +197,7 @@ class Resource(
         val reses = resources.map {
             nullIfNeeded {
                 val sub = koton[RESOURCES, it]()
-                "${it.padEnd(resCount)} ${if(sub is Collection<*>) "[${sub.size}]" else ""}"
+                "${it.padEnd(resCount)} ${if (sub is Collection<*>) "[${sub.size}]" else ""}"
             }
         }.filterNotNull()
 
@@ -229,7 +229,7 @@ class Resource(
         }
         return this()?.let {
             Resource(it, aspect)
-        } ?: null
+        }
     }
 
     /**
@@ -512,10 +512,14 @@ class Resource(
      */
     fun FETCH(link: String, params: Map<String, Any?> = emptyMap(), folder: File, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link)
-                .aspect { DOWNLOAD(headers = headers, file = folder) }
-                .execute(tail)
-                ?: Resource(kotON())
+        val linkObject = getLink(link)
+        linkObject.aspect { DOWNLOAD(headers = headers, file = folder) }
+                .apply {
+                    tail?.let {
+                        this.it()
+                    }
+                }
+        return this
     }
 
     /**
@@ -625,4 +629,4 @@ fun <V> nullIfNeeded(lambda: () -> V): V? {
     }
 }
 
-fun Collection<*>?.nullIfEmpty() = if(this.isNullOrEmpty()) null else this
+fun Collection<*>?.nullIfEmpty() = if (this.isNullOrEmpty()) null else this
