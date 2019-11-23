@@ -73,7 +73,7 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.8.5")
 
-    compile("com.helpchoice.kotlin:koton:1.1.5")
+    compile("com.helpchoice.kotlin:koton:1.1.6")
 }
 
 application {

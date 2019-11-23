@@ -18,7 +18,7 @@ The distribution of the wrapper consists of single library published in BinTray 
 it into build file add:
 
 ```androiddatabinding
-compile("hal.spel:hal-spel:0.1")
+compile("hal.spel:hal-spel:1.2.2")
 ``` 
 
 ## Overview high level DSL
