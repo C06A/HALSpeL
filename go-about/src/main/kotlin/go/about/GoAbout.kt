@@ -44,7 +44,7 @@ class GoAbout {
                 .FETCH(aspect = aopLog)
                 .apply {
                     println("\nVersion: ${this["version"]()}. Build: ${this["build"]()}")
-                    FETCH("http://openid.net/specs/connect/1.0/issuer")
+//                    FETCH("http://openid.net/specs/connect/1.0/issuer")
                     FETCH("http://rels.goabout.com/feedback")
                     FETCH("http://rels.goabout.com/health")
                             .apply {

@@ -3,6 +3,10 @@
 This Kotlin DSL wrapper of Fuel library allowing to access HAL server as collection of Resources.
 It requires minimal coupling between Client and Server.
 
+[![license](https://img.shields.io/github/license/C06A/HALSpeL.svg)](https://github.com/C06A/HALSpeL/blob/master/LICENSE)
+[![Download Latest](https://img.shields.io/badge/download-1.2.3-green.svg)](https://github.com/C06A/HALSpeL/releases/download/v1.2.3/hal-spel-1.2.3.jar)
+
+
 The HAL standard is an extension of the REST API. This means the each URL endpoint points to the Resource,
 which can be created, retrieved, updated and removed. In order to use regular REST API the Client should
 somehow build URL for each endpoint. This strongly coupling Client and Server. 
@@ -18,7 +22,7 @@ The distribution of the wrapper consists of single library published in BinTray 
 it into build file add:
 
 ```androiddatabinding
-compile("hal.spel:hal-spel:1.2.2")
+compile("hal.spel:hal-spel:1.2.3")
 ``` 
 
 ## Overview high level DSL
