@@ -2,9 +2,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.3.50"
-    kotlin("kapt") version "1.3.50"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.3.50"
+    kotlin("jvm") version "1.3.60"
+    kotlin("kapt") version "1.3.60"
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.3.60"
     id("com.github.johnrengelman.shadow") version "4.0.2"
     id("io.spring.dependency-management") version "1.0.6.RELEASE"
 }

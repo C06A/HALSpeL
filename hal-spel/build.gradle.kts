@@ -16,7 +16,7 @@ plugins {
     id("org.jetbrains.dokka") version dokka_version
 }
 
-version = "1.2.2"
+version = "1.2.3"
 group = "hal.spel"
 
 val kotlinVersion: String by project
@@ -29,7 +29,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("io.micronaut:micronaut-bom:1.1.1")
+        mavenBom("io.micronaut:micronaut-bom:1.2.2")
     }
 }
 
