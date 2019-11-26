@@ -510,10 +510,10 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun FETCH(link: String, params: Map<String, Any?> = emptyMap(), folder: File, headers: Headers? = null
+    fun FETCH(link: String, vararg params: Pair<String, Any?>, folder: File, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         val linkObject = getLink(link)
-        linkObject.aspect { DOWNLOAD(headers = headers, file = folder) }
+        linkObject.aspect { DOWNLOAD(*params, headers = headers, file = folder) }
                 .apply {
                     tail?.let {
                         this.it()
@@ -567,7 +567,7 @@ class Answer(
                             throw InvalidPropertiesFormatException(e)
                         }
                     } ?: failure?.let {
-                        Gson().fromJson(String(failure.errorData), Any::class.java)
+                        Gson().fromJson<Any?>(String(failure.errorData), Any::class.java)
                     } ?: ""
             )
         }

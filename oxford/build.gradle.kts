@@ -23,7 +23,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("io.micronaut:micronaut-bom:1.1.1")
+        mavenBom("io.micronaut:micronaut-bom:1.2.2")
     }
 }
 
