@@ -18,7 +18,7 @@ val flue_version: String by project
 
 repositories {
     mavenCentral()
-    maven("https://jcenter.bintray.com")
+    jcenter()
 }
 
 dependencyManagement {
@@ -44,9 +44,11 @@ dependencies {
     compile("info.picocli:picocli")
     compile("io.micronaut.configuration:micronaut-picocli")
     compile("io.micronaut:micronaut-http-server-netty")
+
     compile(project(":fuel-spel"))
 //    compile(project(":hal-spel"))
     compile("hal.spel:hal-spel:1.2.3")
+
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")
     kaptTest("io.micronaut:micronaut-inject-java")
