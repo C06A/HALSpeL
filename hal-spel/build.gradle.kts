@@ -65,7 +65,6 @@ dependencies {
     testRuntime("org.jetbrains.spek:spek-junit-platform-engine:1.1.5")
 
     compile("com.github.kittinunf.fuel:fuel:$flue_version") //for JVM
-    compile("com.github.kittinunf.fuel:fuel-gson:$flue_version") //for json support
     compile("com.github.kittinunf.fuel:fuel-jackson:$flue_version") //for json support
 
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")

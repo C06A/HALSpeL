@@ -137,7 +137,7 @@ For example in order to debug the problem we need to print out the body of the r
         halSpeL("https://api.goabout.com")
                 .FETCH()
                 .FETCH("http://rels.goabout.com/feedback") {
-                    println("Body:\n${GsonBuilder().setPrettyPrinting().create().toJson(body)}")
+                    println("Body:\n${ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
                 }
 ```
 
@@ -192,7 +192,7 @@ body from response.
             it().apply {
                 logger.trace(request.cUrlString())
                 logger.trace("Status: $status")
-                logger.trace("Body:\n${GsonBuilder().setPrettyPrinting().create().toJson(body)}")
+                logger.trace("Body:\n${ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
             }
         }
 ```

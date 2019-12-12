@@ -1,7 +1,7 @@
 package go.about
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.kittinunf.fuel.core.extensions.cUrlString
-import com.google.gson.GsonBuilder
 import fuel.spel.configAsHostnameVerifier
 import fuel.spel.configSslTrust
 import hal.spel.*
@@ -10,6 +10,8 @@ import io.micronaut.http.HttpStatus
 fun main(vararg args: String) {
     GoAbout().test()
 }
+
+val jackson = ObjectMapper()
 
 class GoAbout {
     fun test() {
@@ -29,7 +31,7 @@ class GoAbout {
                 println(request.cUrlString())
                 println("Status: ${status.code} ($status)")
                 when(status.code) {
-                    in(200..299) -> println("Body:\n${GsonBuilder().setPrettyPrinting().create().toJson(body)}")
+                    in(200..299) -> println("Body:\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
                     HttpStatus.FOUND.code -> {
                         println("Redirection to: ${this.response.header("Location").first()}")
                     }

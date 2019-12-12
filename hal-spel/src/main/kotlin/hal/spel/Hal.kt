@@ -1,17 +1,12 @@
 package hal.spel
 
-import com.github.kittinunf.fuel.Fuel
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.kittinunf.fuel.core.*
-import com.github.kittinunf.fuel.core.extensions.cUrlString
-import com.github.kittinunf.fuel.httpPost
-import com.github.kittinunf.result.getAs
 import io.micronaut.http.HttpStatus
 import java.io.File
 import java.lang.IllegalArgumentException
-import com.google.gson.Gson
 import com.helpchoice.kotlin.koton.KotON
 import com.helpchoice.kotlin.koton.kotON
-import io.micronaut.http.MediaType
 import java.lang.Exception
 import java.lang.NullPointerException
 import java.util.*
@@ -547,6 +542,9 @@ class Resource(
 class Answer(
         private val exchange: ResponseResultOf<String>
 ) {
+    companion object {
+        private val jackson = ObjectMapper()
+    }
     val request
         get() = exchange.first
 
@@ -562,12 +560,12 @@ class Answer(
             return kotON(
                     success?.let {
                         try {
-                            Gson().fromJson<Any?>(it, Any::class.java)
+                            jackson.readValue(it, Any::class.java)
                         } catch (e: Exception) {
                             throw InvalidPropertiesFormatException(e)
                         }
                     } ?: failure?.let {
-                        Gson().fromJson<Any?>(String(failure.errorData), Any::class.java)
+                        jackson.readValue(String(failure.errorData), Any::class.java)
                     } ?: ""
             )
         }
