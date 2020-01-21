@@ -212,7 +212,7 @@ class Resource(
         """.trimMargin()
     }
 
-    private fun getLink(rel: String, index: Int? = null): Link {
+    fun getLink(rel: String, index: Int? = null): Link {
         val links = koton[ACTIONS]
         val json = index?.let { links[rel][index] } ?: links[rel]
         return Link(json)
