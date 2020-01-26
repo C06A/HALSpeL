@@ -212,7 +212,7 @@ class Resource(
         """.trimMargin()
     }
 
-    fun getLink(rel: String, index: Int? = null): Link {
+    fun LINK(rel: String, index: Int? = null): Link {
         val links = koton[ACTIONS]
         val json = index?.let { links[rel][index] } ?: links[rel]
         return Link(json)
@@ -270,7 +270,7 @@ class Resource(
      */
     fun FETCH(link: String? = null, index: Int? = null, params: Map<String, Any?>, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self", index).FETCH(params, headers = headers, aspect = aspect, tail = tail)
+        return LINK(link ?: "self", index).FETCH(params, headers = headers, aspect = aspect, tail = tail)
     }
 
     /**
@@ -318,7 +318,7 @@ class Resource(
      */
     fun CREATE(link: String? = null, params: Map<String, Any?>, body: KotON<*>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self")
+        return LINK(link ?: "self")
                 .aspect { POST(params, headers = headers, body = body.toJson()) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -337,7 +337,7 @@ class Resource(
      */
     fun CREATE(link: String? = null, params: Map<String, Any?>, body: String, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self")
+        return LINK(link ?: "self")
                 .aspect { POST(params, headers = headers, body = body) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -357,7 +357,7 @@ class Resource(
      */
     fun CREATE(link: String? = null, params: Map<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self")
+        return LINK(link ?: "self")
                 .aspect { POST(params, headers = headers, source = source, length = length) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -392,7 +392,7 @@ class Resource(
      */
     fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
                 , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self")
+        return LINK(link ?: "self")
                 .aspect { PUT(*params, headers = headers, body = body) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -412,7 +412,7 @@ class Resource(
      */
     fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
                 , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self")
+        return LINK(link ?: "self")
                 .aspect { PUT(*params, headers = headers, source = source, length = length) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -469,7 +469,7 @@ class Resource(
 //    }
 //
 //    fun PLACE(link: String, params: Map<String, Any?>, files: Map<String, File>, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self")
+        return LINK(link ?: "self")
                 .aspect { UPLOAD(*params, headers = headers, files = files) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -488,7 +488,7 @@ class Resource(
      */
     fun UPDATE(link: String? = null, params: Map<String, Any?> = emptyMap(), body: KotON<*>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self")
+        return LINK(link ?: "self")
                 .aspect { PATCH(headers = headers, body = body.toJson()) }
                 .execute(tail)
                 ?: Resource(kotON())
@@ -507,7 +507,7 @@ class Resource(
      */
     fun FETCH(link: String, vararg params: Pair<String, Any?>, folder: File, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        val linkObject = getLink(link)
+        val linkObject = LINK(link)
         linkObject.aspect { DOWNLOAD(*params, headers = headers, file = folder) }
                 .apply {
                     tail?.let {
@@ -529,7 +529,7 @@ class Resource(
      */
     fun REMOVE(link: String? = null, params: Map<String, Any?> = emptyMap(), headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
-        return getLink(link ?: "self")
+        return LINK(link ?: "self")
                 .aspect { DELETE(headers = headers) }
                 .execute(tail)
                 ?: Resource(kotON())
