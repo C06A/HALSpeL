@@ -32,11 +32,10 @@ dependencyManagement {
     }
 }
 
+val developmentOnly by configurations.creating
 configurations {
     // for dependencies that are needed for development only
-//    developmentOnly {
-//
-//    }
+    developmentOnly
 }
 
 dependencies {
@@ -103,7 +102,7 @@ run.apply {
 val test: Test by tasks
 test.apply {
     useJUnitPlatform()
-//test.classpath += configurations.developmentOnly
+    classpath += developmentOnly
 }
 
 val sourcesJar = task<Jar>("sourcesJar") {
@@ -134,7 +133,7 @@ task("writeNewPom") {
     }
 }
 
-val dokka : DokkaTask by tasks
+val dokka: DokkaTask by tasks
 dokka.apply {
     outputFormat = "html"
     outputDirectory = "$buildDir/dokka"
