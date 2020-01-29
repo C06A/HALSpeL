@@ -28,7 +28,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("io.micronaut:micronaut-bom:1.2.2")
+        mavenBom("io.micronaut:micronaut-bom:1.2.10")
     }
 }
 
@@ -39,19 +39,17 @@ configurations {
 }
 
 dependencies {
-    compile("io.micronaut:micronaut-management")
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-    compile("io.micronaut:micronaut-runtime")
-    compile("io.micronaut.configuration:micronaut-micrometer-core")
-    compile("io.micronaut:micronaut-http-client")
-    compile("info.picocli:picocli")
-    compile("io.micronaut.configuration:micronaut-picocli")
-    compile("io.micronaut:micronaut-http-server-netty")
 
-    kapt("io.micronaut:micronaut-inject-java")
-    kapt("io.micronaut:micronaut-validation")
-    kaptTest("io.micronaut:micronaut-inject-java")
+    compile("io.micronaut:micronaut-http-client")
+
+    compile("com.github.kittinunf.fuel:fuel:$flue_version") //for JVM
+    compile("com.github.kittinunf.fuel:fuel-jackson:$flue_version") //for json support
+
+    compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
+
+    compile("com.helpchoice.kotlin:koton:1.1.6")
 
     runtime("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     runtime("ch.qos.logback:logback-classic:1.2.3")
@@ -62,15 +60,6 @@ dependencies {
     testCompile("io.micronaut.test:micronaut-test-junit5")
     testRuntime("org.junit.jupiter:junit-jupiter-engine")
     testRuntime("org.jetbrains.spek:spek-junit-platform-engine:1.1.5")
-
-    compile("com.github.kittinunf.fuel:fuel:$flue_version") //for JVM
-    compile("com.github.kittinunf.fuel:fuel-jackson:$flue_version") //for json support
-
-    compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
-
-    implementation("com.google.code.gson:gson:2.8.5")
-
-    compile("com.helpchoice.kotlin:koton:1.1.6")
 }
 
 application {
