@@ -5,6 +5,10 @@ import com.github.kittinunf.fuel.core.extensions.cUrlString
 import hal.spel.Answer
 import hal.spel.FETCH
 import hal.spel.Link
+import hal.spel.aspect.AnswerFun
+import hal.spel.aspect.CONN_PARTS
+import hal.spel.aspect.makePostLoggerAspect
+import hal.spel.aspect.makePreLoggerAspect
 import io.micronaut.http.MediaType
 
 class Oxford {
@@ -17,40 +21,26 @@ class Oxford {
             Link("${entry}${this.href}"
                     , type = type
                     , templated = templated
-            ).apply {
-                println()
-                println("URL: $href")
-            }.it().apply {
-                println("$> ${request.cUrlString()}")
-            }
+            ).it()
         }
+
+        val logger: (String) -> Unit = { println(); println(it) }
 
         @JvmStatic
         fun main(vararg args: String) {
             Link("/"
                     , type = MediaType.APPLICATION_HAL_JSON
-            ).FETCH(aspect = aspect) {
-                println("Status: ${status.code} ($status)")
-                println("Body:\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
-            }.apply {
+            ).FETCH(aspect = makePostLoggerAspect(logger, CONN_PARTS.URL, CONN_PARTS.BODY_OUT, CONN_PARTS.STATUS, CONN_PARTS.BODY_IN, aspect = makePreLoggerAspect(logger, aspect))
+            ).apply {
                 FETCH("app:contacts")
                 FETCH("app:courses"
-                ) {
-                    println("Status: ${status.code} ($status)")
-                    println("Body:\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
-                }.apply {
-                    FETCH("hl:course", "id" to 10) {
-                        println("Status: ${status.code} ($status)")
-                        println("Body:\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
-                    }
+                ).apply {
+                    FETCH("hl:course", "id" to 10)
                 }.apply {
                     FETCH("hl:subjects"
                     ).FETCH("courses:subject", 0)
                 }.apply {
-                    FETCH("hl:search", "q" to "Russian") {
-                        println("Status: ${status.code} ($status)")
-                        println("Body:\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
-                    }
+                    FETCH("hl:search", "q" to "Russian")
                 }
 
                 FETCH("app:library")

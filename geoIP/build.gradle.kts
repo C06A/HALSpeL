@@ -1,17 +1,22 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    val dokka_version = "0.10.0"
+
     application
+    maven
     kotlin("jvm")
     kotlin("kapt")
     id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.plugin.allopen")
     id("com.github.johnrengelman.shadow")
+    id("org.jetbrains.dokka") version dokka_version
 }
 
-version = "0.1"
-group = "go.about"
+version = "1.3.1"
+group = "hal.spel"
 
 val kotlinVersion: String by project
 val flue_version: String by project
@@ -23,38 +28,35 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("io.micronaut:micronaut-bom:1.2.2")
+        mavenBom("io.micronaut:micronaut-bom:1.3.0")
     }
 }
 
+val developmentOnly by configurations.creating
 configurations {
     // for dependencies that are needed for development only
-//    developmentOnly {
-//
-//    }
+    developmentOnly
 }
 
 dependencies {
-    compile("io.micronaut:micronaut-management")
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-    compile("io.micronaut:micronaut-runtime")
-    compile("io.micronaut.configuration:micronaut-micrometer-core")
-    compile("io.micronaut:micronaut-http-client")
-    compile("info.picocli:picocli")
-    compile("io.micronaut.configuration:micronaut-picocli")
-    compile("io.micronaut:micronaut-http-server-netty")
 
-    compile(project(":fuel-spel"))
-//    compile(project(":hal-spel"))
+    compile("io.micronaut:micronaut-http-client")
+
+    compile("com.github.kittinunf.fuel:fuel:$flue_version") //for JVM
+    compile("com.github.kittinunf.fuel:fuel-jackson:$flue_version") //for json support
+
+    compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
+
+    compile("com.helpchoice.kotlin:koton:1.1.6")
     compile("hal.spel:hal-spel:1.3.1")
 
-    kapt("io.micronaut:micronaut-inject-java")
-    kapt("io.micronaut:micronaut-validation")
-    kaptTest("io.micronaut:micronaut-inject-java")
+    compile("org.slf4j:slf4j-api:1.7.25")
+
     runtime("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     runtime("ch.qos.logback:logback-classic:1.2.3")
-    implementation("com.google.code.gson:gson:2.8.5")
+
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")
     testCompile("org.junit.jupiter:junit-jupiter-api")
     testCompile("org.jetbrains.spek:spek-api:1.1.5")
@@ -64,7 +66,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "go.about.Application"
+    mainClassName = "hal.spel.Application"
 }
 
 allOpen {
@@ -77,7 +79,7 @@ shadowJar.mergeServiceFiles()
 tasks.withType(KotlinCompile::class) {
     kotlinOptions {
         jvmTarget = "1.8"
-        //Will retain parameter names for Java reflection
+//Will retain parameter names for Java reflection
         javaParameters = true
     }
 }
@@ -92,5 +94,47 @@ run.apply {
 val test: Test by tasks
 test.apply {
     useJUnitPlatform()
-//test.classpath += configurations.developmentOnly
+    classpath += developmentOnly
+}
+
+val sourcesJar = task<Jar>("sourcesJar") {
+    group = "build"
+
+    archiveClassifier.set("sources")
+    from(sourceSets["main"].allSource)
+}
+
+task("writeNewPom") {
+    group = "build"
+
+    doLast {
+        maven.pom {
+            withGroovyBuilder {
+                "project" {
+                    setProperty("inceptionYear", "2019")
+                    "licenses" {
+                        "license" {
+                            setProperty("name", "The Apache Software License, Version 2.0")
+                            setProperty("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+                            setProperty("distribution", "repo")
+                        }
+                    }
+                }
+            }
+        }.writeTo("$buildDir/libs/${project.name}-${version}.pom")
+    }
+}
+
+val dokka: DokkaTask by tasks
+dokka.apply {
+    outputFormat = "html"
+    outputDirectory = "$buildDir/dokka"
+}
+
+val dokkadocJar = task<Jar>("dokkadocJar") {
+    dependsOn(dokka)
+    group = "build"
+
+    classifier = "javadoc"
+    from(dokka.outputDirectory)
 }

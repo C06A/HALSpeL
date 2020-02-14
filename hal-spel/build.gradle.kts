@@ -28,7 +28,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("io.micronaut:micronaut-bom:1.2.10")
+        mavenBom("io.micronaut:micronaut-bom:1.3.0")
     }
 }
 
@@ -50,6 +50,8 @@ dependencies {
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
 
     compile("com.helpchoice.kotlin:koton:1.1.6")
+
+    compile("org.slf4j:slf4j-api:1.7.25")
 
     runtime("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     runtime("ch.qos.logback:logback-classic:1.2.3")
