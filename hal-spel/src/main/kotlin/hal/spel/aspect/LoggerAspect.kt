@@ -13,42 +13,40 @@ const val UNSTRUCTURED_HEAD_LENGTH = 100L
 
 private val jackson = ObjectMapper()
 
-fun makePreLoggerAspect(logger: (String) -> Unit, aspect: Aspect? = null): Aspect {
-    val linkLogger: LinkFun = {
-        logger("--------------\n${if (name.isNullOrBlank()) {
-            "Link href: $href"
-        } else {
-            "Link name: $name ($href)"
-        }}")
-    }
+val preLoggerFormatter = mapOf<PRE_PARTS, (Link, (String) -> Unit) -> Unit>(
+        PRE_PARTS.LINK to { link, reporter ->
+            reporter("--------------\n${if (link.name.isNullOrBlank()) {
+                "Link href: ${link.href}"
+            } else {
+                "Link name: ${link.name} (${link.href})"
+            }}")
+        },
+        PRE_PARTS.URL to { link, reporter -> reporter("URL: ${link.href}") },
+        PRE_PARTS.NAME to { link, reporter -> reporter("Named: ${link.name}")},
+        PRE_PARTS.TITLE to { link, reporter -> reporter("Titled: ${link.title}")},
+        PRE_PARTS.TYPE to { link, reporter -> reporter("Accept: ${link.type}")}
+)
 
-    return makePreReporterAspect(
-            linkLogger
-            , aspect = makeDefaultAspectIfNull(aspect)
-    )
-}
-
-val postLoggerFormatter = mapOf<CONN_PARTS, (Answer, (String) -> Unit) -> Unit>(
-        CONN_PARTS.URL to { answer, logger -> logger("URL: ${answer.request.url}") },
-        CONN_PARTS.LINK to { answer, logger -> logger("Resource Location: ${answer.response.url}") },
-        CONN_PARTS.CURL to { answer, logger ->
+val postLoggerFormatter = mapOf<POST_PARTS, (Answer, (String) -> Unit) -> Unit>(
+        POST_PARTS.URL to { answer, reporter -> reporter("Resource Location: ${answer.response.url}") },
+        POST_PARTS.CURL to { answer, reporter ->
             if (answer.request.method == Method.GET || answer.request.header(Headers.CONTENT_TYPE).contains("json")) {
-                logger("$> ${answer.request.cUrlString()}")
+                reporter("$> ${answer.request.cUrlString()}")
             }
         },
-        CONN_PARTS.HEADERS_OUT to { answer, logger ->
-            logger(
+        POST_PARTS.HEADERS_OUT to { answer, reporter ->
+            reporter(
                     "Header sent: ${answer.request.headers.map { (key, value) ->
                         "\t$key:\t${value.joinToString("\n\t\t")}"
                     }.joinToString("\n", "\n")}"
             )
         },
-        CONN_PARTS.COOKIES_OUT to { answer, logger ->
-            logger("Cookies sent: ${answer.request["Set-Cookies"].joinToString("\n\t", "\n\t")}")
+        POST_PARTS.COOKIES_OUT to { answer, reporter ->
+            reporter("Cookies sent: ${answer.request["Set-Cookies"].joinToString("\n\t", "\n\t")}")
         },
-        CONN_PARTS.BODY_OUT to { answer, logger ->
+        POST_PARTS.BODY_OUT to { answer, reporter ->
             if (answer.request.method in setOf(Method.POST, Method.PUT, Method.PATCH))
-            logger(
+            reporter(
                     if (answer.request.body.isConsumed()) {
                         "Length of the sent Body: ${answer.request.body.length}"
                     } else {
@@ -56,19 +54,19 @@ val postLoggerFormatter = mapOf<CONN_PARTS, (Answer, (String) -> Unit) -> Unit>(
                     }
             )
         },
-        CONN_PARTS.STATUS to { answer, logger -> logger("Status: ${answer.status.code} (${answer.status})") },
-        CONN_PARTS.HEADERS_IN to { answer, logger ->
+        POST_PARTS.STATUS to { answer, reporter -> reporter("Status: ${answer.status.code} (${answer.status})") },
+        POST_PARTS.HEADERS_IN to { answer, logger ->
             logger(
                     "Headers received: ${answer.response.headers.map { (key, value) ->
                         "\t$key:\t${value.joinToString("\n\t\t")}"
                     }.joinToString("\n", "\n")}"
             )
         },
-        CONN_PARTS.COOKIES_IN to { answer, logger ->
-            logger("Cookies received: ${answer.response["Cookies"].joinToString("\n\t", "\n\t")}")
+        POST_PARTS.COOKIES_IN to { answer, reporter ->
+            reporter("Cookies received: ${answer.response["Cookies"].joinToString("\n\t", "\n\t")}")
         },
-        CONN_PARTS.BODY_IN to { answer, logger ->
-            logger( "Body received:${
+        POST_PARTS.BODY_IN to { answer, reporter ->
+            reporter( "Body received:${
                     when (answer.status.code) {
                         in (200..299) ->
                             if (answer.response.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
@@ -83,15 +81,3 @@ val postLoggerFormatter = mapOf<CONN_PARTS, (Answer, (String) -> Unit) -> Unit>(
             )
         }
 )
-
-fun makePostLoggerAspect(logger: (String) -> Unit, vararg parts: CONN_PARTS, aspect: Aspect? = null): Aspect {
-
-    return makePostReporterAspect(
-            *(parts.map {
-                { answer: Answer ->
-                    postLoggerFormatter[it]?.invoke(answer, logger) ?: Unit
-                }
-            }.toTypedArray())
-            , aspect = makeDefaultAspectIfNull(aspect)
-    )
-}

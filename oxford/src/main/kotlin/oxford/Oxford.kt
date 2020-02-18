@@ -1,19 +1,15 @@
 package oxford
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.kittinunf.fuel.core.extensions.cUrlString
 import hal.spel.Answer
 import hal.spel.FETCH
 import hal.spel.Link
-import hal.spel.aspect.AnswerFun
-import hal.spel.aspect.CONN_PARTS
-import hal.spel.aspect.makePostLoggerAspect
-import hal.spel.aspect.makePreLoggerAspect
+import hal.spel.aspect.*
 import io.micronaut.http.MediaType
+import org.slf4j.LoggerFactory
 
 class Oxford {
     companion object {
-        val jackson = ObjectMapper()
+        val log = LoggerFactory.getLogger(this::class.java)
 
         val entry = "http://api.m.ox.ac.uk"
 
@@ -25,12 +21,16 @@ class Oxford {
         }
 
         val logger: (String) -> Unit = { println(); println(it) }
+//        val logger: (String) -> Unit = { log.info(it) }
 
         @JvmStatic
         fun main(vararg args: String) {
             Link("/"
                     , type = MediaType.APPLICATION_HAL_JSON
-            ).FETCH(aspect = makePostLoggerAspect(logger, CONN_PARTS.URL, CONN_PARTS.BODY_OUT, CONN_PARTS.STATUS, CONN_PARTS.BODY_IN, aspect = makePreLoggerAspect(logger, aspect))
+            ).FETCH(aspect = makePostReporterAspect(logger
+                    , postLoggerFormatter
+                    , POST_PARTS.URL, POST_PARTS.BODY_OUT, POST_PARTS.STATUS // , CONN_PARTS.BODY_IN
+                    , aspect = makePreReporterAspect(logger, preLoggerFormatter, PRE_PARTS.LINK, aspect = aspect))
             ).apply {
                 FETCH("app:contacts")
                 FETCH("app:courses"

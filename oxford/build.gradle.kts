@@ -44,10 +44,11 @@ dependencies {
     compile("info.picocli:picocli")
     compile("io.micronaut.configuration:micronaut-picocli")
     compile("io.micronaut:micronaut-http-server-netty")
+    compile("org.slf4j:slf4j-api:1.7.25")
 
     compile(project(":fuel-spel"))
-//    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.3.1")
+    compile(project(":hal-spel"))
+//    compile("hal.spel:hal-spel:1.4.0")
 
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")

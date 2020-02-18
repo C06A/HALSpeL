@@ -5,9 +5,7 @@ import com.github.kittinunf.fuel.core.extensions.cUrlString
 import fuel.spel.configAsHostnameVerifier
 import fuel.spel.configSslTrust
 import hal.spel.*
-import hal.spel.aspect.CONN_PARTS
-import hal.spel.aspect.makePostLoggerAspect
-import hal.spel.aspect.makePreLoggerAspect
+import hal.spel.aspect.*
 import io.micronaut.http.HttpStatus
 
 fun main(vararg args: String) {
@@ -49,7 +47,10 @@ class GoAbout {
         val logger: (String)->Unit = { println(); println(it) }
 
         halSpeL("https://api.goabout.com")
-                .FETCH(aspect = makePostLoggerAspect(logger, *CONN_PARTS.values(), aspect = makePreLoggerAspect(logger)))
+                .FETCH(aspect = makePostReporterAspect(logger
+                        , postLoggerFormatter
+                        , *POST_PARTS.values()
+                        , aspect = makePreReporterAspect(logger, preLoggerFormatter, PRE_PARTS.LINK)))
                 .apply {
                     println("\nVersion: ${this["version"]()}. Build: ${this["build"]()}")
 //                    FETCH("http://openid.net/specs/connect/1.0/issuer")

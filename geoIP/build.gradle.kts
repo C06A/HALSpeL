@@ -50,7 +50,8 @@ dependencies {
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
 
     compile("com.helpchoice.kotlin:koton:1.1.6")
-    compile("hal.spel:hal-spel:1.3.1")
+    compile(project(":hal-spel"))
+//    compile("hal.spel:hal-spel:1.4.0")
 
     compile("org.slf4j:slf4j-api:1.7.25")
 

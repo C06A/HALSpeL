@@ -20,9 +20,10 @@ data class Link(
         , val profile: String? = null
         , val title: String? = null
         , val hreflang: Locale? = null
+        , val rel: String? = null
 ) {
-    constructor(kotON: KotON<Any>) : this(
-            kotON["href"]<String>() ?: throw Exception("")
+    constructor(kotON: KotON<Any>, rel: String? = null) : this(
+            kotON["href"]<String>() ?: throw Exception("The \"href\" field is required for Link.")
             , kotON<Boolean>("templated")
             , kotON<String>("type")
             , kotON<String>("description")
@@ -30,6 +31,7 @@ data class Link(
             , kotON<String>("profile")
             , kotON<String>("title")
             , kotON<Locale>("hreflang")
+            , rel
     )
 
     private var parameters = mutableMapOf<String, Any?>()
