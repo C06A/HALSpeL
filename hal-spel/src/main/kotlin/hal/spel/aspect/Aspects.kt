@@ -19,12 +19,13 @@ fun makeDefaultAspectIfNull(aspect: Aspect?): Aspect {
  * Enlisting different parts of the Answer object to choose when reporting
  */
 enum class PRE_PARTS {
+    REL,
     LINK,
     HREF,
     TYPE,
     TITLE,
     NAME,
-    URL
+    URI
 }
 enum class POST_PARTS {
     URL,

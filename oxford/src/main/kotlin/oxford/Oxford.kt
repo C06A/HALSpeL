@@ -4,12 +4,12 @@ import hal.spel.Answer
 import hal.spel.FETCH
 import hal.spel.Link
 import hal.spel.aspect.*
+import hal.spel.halSpeL
 import io.micronaut.http.MediaType
 import org.slf4j.LoggerFactory
 
 class Oxford {
     companion object {
-        val log = LoggerFactory.getLogger(this::class.java)
 
         val entry = "http://api.m.ox.ac.uk"
 
@@ -20,17 +20,16 @@ class Oxford {
             ).it()
         }
 
-        val logger: (String) -> Unit = { println(); println(it) }
-//        val logger: (String) -> Unit = { log.info(it) }
+        val reporter: (String) -> Unit = { println(); println(it) }
 
         @JvmStatic
         fun main(vararg args: String) {
-            Link("/"
+            halSpeL("/"
                     , type = MediaType.APPLICATION_HAL_JSON
-            ).FETCH(aspect = makePostReporterAspect(logger
-                    , postLoggerFormatter
-                    , POST_PARTS.URL, POST_PARTS.BODY_OUT, POST_PARTS.STATUS // , CONN_PARTS.BODY_IN
-                    , aspect = makePreReporterAspect(logger, preLoggerFormatter, PRE_PARTS.LINK, aspect = aspect))
+                    , rel = "entryPoint"
+            ).FETCH(aspect = makePostADocTag(reporter
+                    , *POST_PARTS.values()
+                    , aspect = makePreADocTag(reporter, PRE_PARTS.REL, PRE_PARTS.LINK, aspect = aspect))
             ).apply {
                 FETCH("app:contacts")
                 FETCH("app:courses"
@@ -38,7 +37,8 @@ class Oxford {
                     FETCH("hl:course", "id" to 10)
                 }.apply {
                     FETCH("hl:subjects"
-                    ).FETCH("courses:subject", 0)
+                    ).FETCH("courses:subject", 0
+                    )
                 }.apply {
                     FETCH("hl:search", "q" to "Russian")
                 }

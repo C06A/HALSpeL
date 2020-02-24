@@ -21,7 +21,7 @@ val preLoggerFormatter = mapOf<PRE_PARTS, (Link, (String) -> Unit) -> Unit>(
                 "Link name: ${link.name} (${link.href})"
             }}")
         },
-        PRE_PARTS.URL to { link, reporter -> reporter("URL: ${link.href}") },
+        PRE_PARTS.URI to { link, reporter -> reporter("URL: ${link.href}") },
         PRE_PARTS.NAME to { link, reporter -> reporter("Named: ${link.name}")},
         PRE_PARTS.TITLE to { link, reporter -> reporter("Titled: ${link.title}")},
         PRE_PARTS.TYPE to { link, reporter -> reporter("Accept: ${link.type}")}

@@ -215,7 +215,7 @@ class Resource(
     fun LINK(rel: String, index: Int? = null): Link {
         val links = koton[ACTIONS]
         val json = index?.let { links[rel][index] } ?: links[rel]
-        return Link(json)
+        return Link(json, rel)
     }
 
     private fun Answer.execute(tail: (Answer.() -> Unit)? = null): Resource? {
@@ -608,7 +608,7 @@ operator fun Headers.plus(header: Pair<String, String>?): Headers {
     return header?.let { append(header.first, header.second) } ?: this
 }
 
-fun halSpeL(href: String, type: String? = null, templated: Boolean? = null): Link {
+fun halSpeL(href: String, type: String? = null, templated: Boolean? = null, rel: String? = null): Link {
     return Link(
             kotON {
                 "href" to href
@@ -616,7 +616,7 @@ fun halSpeL(href: String, type: String? = null, templated: Boolean? = null): Lin
                     "templated" to it
                 }
                 "type" to (type ?: "application/hal+json")
-            })
+            }, rel)
 }
 
 fun <V> nullIfNeeded(lambda: () -> V): V? {

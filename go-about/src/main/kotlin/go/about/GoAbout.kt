@@ -7,6 +7,7 @@ import fuel.spel.configSslTrust
 import hal.spel.*
 import hal.spel.aspect.*
 import io.micronaut.http.HttpStatus
+import org.slf4j.LoggerFactory
 
 fun main(vararg args: String) {
     GoAbout().test()
@@ -15,6 +16,9 @@ fun main(vararg args: String) {
 val jackson = ObjectMapper()
 
 class GoAbout {
+    val log = LoggerFactory.getLogger(this::class.java)
+    val reporter: (String) -> Unit = { log.info(it) }
+
     fun test() {
         println("Documentation: https://apidocs.goabout.com")
         println()
@@ -32,8 +36,8 @@ class GoAbout {
             it().apply {
                 println(request.cUrlString())
                 println("Status: ${status.code} ($status)")
-                when(status.code) {
-                    in(200..299) -> println("Body:\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
+                when (status.code) {
+                    in (200..299) -> println("Body:\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
                     HttpStatus.FOUND.code -> {
                         println("Redirection to: ${this.response.header("Location").first()}")
                     }
@@ -44,13 +48,11 @@ class GoAbout {
             }
         }
 
-        val logger: (String)->Unit = { println(); println(it) }
-
-        halSpeL("https://api.goabout.com")
-                .FETCH(aspect = makePostReporterAspect(logger
+        halSpeL("https://api.goabout.com", rel = "entry")
+                .FETCH(aspect = makePostReporterAspect(reporter
                         , postLoggerFormatter
-                        , *POST_PARTS.values()
-                        , aspect = makePreReporterAspect(logger, preLoggerFormatter, PRE_PARTS.LINK)))
+                        , *(POST_PARTS.values().filter { it == POST_PARTS.BODY_OUT }.toTypedArray())
+                        , aspect = makePreReporterAspect(reporter, preLoggerFormatter, *PRE_PARTS.values())))
                 .apply {
                     println("\nVersion: ${this["version"]()}. Build: ${this["build"]()}")
 //                    FETCH("http://openid.net/specs/connect/1.0/issuer")
