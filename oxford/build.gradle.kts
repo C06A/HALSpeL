@@ -47,8 +47,8 @@ dependencies {
     compile("org.slf4j:slf4j-api:1.7.25")
 
     compile(project(":fuel-spel"))
-    compile(project(":hal-spel"))
-//    compile("hal.spel:hal-spel:1.4.0")
+//    compile(project(":hal-spel"))
+    compile("hal.spel:hal-spel:1.5.0")
 
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")

@@ -46,8 +46,8 @@ dependencies {
     compile("io.micronaut:micronaut-http-server-netty")
 
     compile(project(":fuel-spel"))
-    compile(project(":hal-spel"))
-//    compile("hal.spel:hal-spel:1.4.0")
+//    compile(project(":hal-spel"))
+    compile("hal.spel:hal-spel:1.5.0")
 
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")

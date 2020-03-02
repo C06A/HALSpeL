@@ -13,9 +13,10 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen")
     id("com.github.johnrengelman.shadow")
     id("org.jetbrains.dokka") version dokka_version
+    id("com.vanniktech.dependency.graph.generator") version "0.5.0"
 }
 
-version = "1.5.0"
+version = "1.5.1"
 group = "hal.spel"
 
 val kotlinVersion: String by project
