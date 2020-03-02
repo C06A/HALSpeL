@@ -136,10 +136,10 @@ val postADocTagFormatter = mapOf<POST_PARTS, (Answer, (String) -> Unit) -> Unit>
         }
 )
 
-fun makePreADocTag(reporter: (String) -> Unit, vararg parts: PRE_PARTS, aspect: Aspect? = null): Aspect {
+fun makePreADocTagAspect(reporter: (String) -> Unit, vararg parts: PRE_PARTS, aspect: Aspect? = null): Aspect {
     return makePreReporterAspect(reporter, preADocTagFormatter, *parts, aspect = aspect)
 }
 
-fun makePostADocTag(reporter: (String) -> Unit, vararg parts: POST_PARTS, aspect: Aspect? = null): Aspect {
+fun makePostADocTagAspect(reporter: (String) -> Unit, vararg parts: POST_PARTS, aspect: Aspect? = null): Aspect {
     return makePostReporterAspect(reporter, postADocTagFormatter, *parts, aspect = aspect)
 }

@@ -82,10 +82,10 @@ val postLoggerFormatter = mapOf<POST_PARTS, (Answer, (String) -> Unit) -> Unit>(
         }
 )
 
-fun makePreLogger(reporter: (String) -> Unit, vararg parts: PRE_PARTS, aspect: Aspect? = null): Aspect {
+fun makePreLoggerAspect(reporter: (String) -> Unit, vararg parts: PRE_PARTS, aspect: Aspect? = null): Aspect {
     return makePreReporterAspect(reporter, preLoggerFormatter, *parts, aspect = aspect)
 }
 
-fun makePostLogger(reporter: (String) -> Unit, vararg parts: POST_PARTS, aspect: Aspect? = null): Aspect {
+fun makePostLoggerAspect(reporter: (String) -> Unit, vararg parts: POST_PARTS, aspect: Aspect? = null): Aspect {
     return makePostReporterAspect(reporter, postLoggerFormatter, *parts, aspect = aspect)
 }

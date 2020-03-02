@@ -49,10 +49,9 @@ class GoAbout {
         }
 
         halSpeL("https://api.goabout.com", rel = "entry")
-                .FETCH(aspect = makePostReporterAspect(reporter
-                        , postLoggerFormatter
+                .FETCH(aspect = makePostLoggerAspect(reporter
                         , *(POST_PARTS.values().filter { it == POST_PARTS.BODY_OUT }.toTypedArray())
-                        , aspect = makePreReporterAspect(reporter, preLoggerFormatter, *PRE_PARTS.values())))
+                        , aspect = makePreLoggerAspect(reporter, *PRE_PARTS.values())))
                 .apply {
                     println("\nVersion: ${this["version"]()}. Build: ${this["build"]()}")
 //                    FETCH("http://openid.net/specs/connect/1.0/issuer")
