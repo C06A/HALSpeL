@@ -29,6 +29,7 @@ private val SIMPLE_ASPECT: Link.(Link.() -> Answer) -> Answer = { it() }
  * @param tail -- the post-processing for single request
  * @return the Resource returned by the server
  */
+@JvmOverloads
 fun Link.FETCH(
         vararg params: Pair<String, Any?>
         , headers: Headers? = null
@@ -50,6 +51,7 @@ fun Link.FETCH(
  * @param tail -- the post-processing for single request
  * @return the Resource returned by the server
  */
+@JvmOverloads
 fun Link.FETCH(
         params: Map<String, Any?>
         , headers: Headers? = null
@@ -80,6 +82,7 @@ fun Link.FETCH(
  * @param tail -- the post-processing for single request
  * @return the Resource returned by the server
  */
+@JvmOverloads
 fun Link.CREATE(
         vararg params: Pair<String, Any?>
         , headers: Headers? = null
@@ -103,6 +106,7 @@ fun Link.CREATE(
  * @param tail -- the post-processing for single request
  * @return the Resource returned by the server
  */
+@JvmOverloads
 fun Link.CREATE(
         params: Map<String, Any?> = emptyMap()
         , headers: Headers? = null
@@ -238,7 +242,8 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
-    fun FETCH(link: String? = null, index: Int? = null, vararg params: Pair<String, Any?>, headers: Headers? = null
+    @JvmOverloads
+    fun FETCH(link: String? = null, index: Int, vararg params: Pair<String, Any?>, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return FETCH(link, index, params.toMap(), headers, aspect, tail)
     }
@@ -253,6 +258,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun FETCH(link: String? = null, vararg params: Pair<String, Any?>, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return FETCH(link, null, params.toMap(), headers, aspect, tail)
@@ -268,6 +274,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun FETCH(link: String? = null, index: Int? = null, params: Map<String, Any?>, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self", index).FETCH(params, headers = headers, aspect = aspect, tail = tail)
@@ -284,6 +291,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, body: KotON<*>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, params.toMap(), body.toJson(), headers, aspect, tail)
@@ -300,6 +308,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, params.toMap(), body, headers, aspect, tail)
@@ -316,6 +325,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun CREATE(link: String? = null, params: Map<String, Any?>, body: KotON<*>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
@@ -335,6 +345,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun CREATE(link: String? = null, params: Map<String, Any?>, body: String, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
@@ -355,6 +366,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun CREATE(link: String? = null, params: Map<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
@@ -374,6 +386,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, body: KotON<*>, headers: Headers? = null
                 , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return REPLACE(link, *params, body = body.toJson(), headers = headers, aspect = aspect, tail = tail)
@@ -390,6 +403,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
                 , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
@@ -410,6 +424,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
                 , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
@@ -429,6 +444,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, file: File, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, *params, files = mapOf(file to file.name), headers = headers, aspect = aspect, tail = tail)
@@ -445,6 +461,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, files: Collection<File>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, *params, files = files.map {
@@ -463,6 +480,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, files: Map<File, String>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
 //        return PLACE(link, params.toMap(), files, tail)
@@ -486,6 +504,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun UPDATE(link: String? = null, params: Map<String, Any?> = emptyMap(), body: KotON<*>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
@@ -505,6 +524,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun FETCH(link: String, vararg params: Pair<String, Any?>, folder: File, headers: Headers? = null
               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         val linkObject = LINK(link)
@@ -527,6 +547,7 @@ class Resource(
      * @param tail -- the post-processing for single request
      * @return the Resource returned by the server
      */
+    @JvmOverloads
     fun REMOVE(link: String? = null, params: Map<String, Any?> = emptyMap(), headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")

@@ -4,7 +4,18 @@ import hal.spel.*
 import io.micronaut.http.HttpStatus
 
 fun main(vararg args: String) {
-    var myId: String? = null
+    val link = halSpeL("http://ip-api.com{/format}{/query}{?fields,lang}"
+            , templated = true
+    )
+
+    val answer = link.GET("format" to "json")
+
+    answer.apply {
+        println("URL: ${request.url}")
+        println(status.code)
+        println(body?.invoke())
+        println(body?.let { it["query"]() })
+    }
 
     halSpeL("http://ip-api.com{/format}{/query}{?fields,lang}"
             , templated = true

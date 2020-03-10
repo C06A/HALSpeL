@@ -18,8 +18,8 @@ fun main(vararg args: String) {
         ).apply {
             println("URL: ${request.url}")
             println(status.code)
-//            println(body?.invoke())
-//            println(body?.let { it["ip"]() })
+            println(body?.invoke())
+            println(body?.let { it["ip"]() })
         }
 
         GET(
