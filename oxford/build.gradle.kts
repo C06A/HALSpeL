@@ -5,12 +5,13 @@ plugins {
     application
     kotlin("jvm")
     kotlin("kapt")
+    groovy
     id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.plugin.allopen")
     id("com.github.johnrengelman.shadow")
 }
 
-version = "0.1"
+version = "1.5.2"
 group = "oxford"
 
 val kotlinVersion: String by project
@@ -48,7 +49,10 @@ dependencies {
 
     compile(project(":fuel-spel"))
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.5.1")
+    compile("hal.spel:hal-spel:1.5.2")
+
+    compileOnly("io.micronaut:micronaut-inject-groovy")
+    implementation("io.micronaut:micronaut-runtime-groovy")
 
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")
@@ -65,6 +69,11 @@ dependencies {
     testCompile("io.micronaut.test:micronaut-test-junit5")
     testRuntime("org.junit.jupiter:junit-jupiter-engine")
     testRuntime("org.jetbrains.spek:spek-junit-platform-engine:1.1.5")
+
+    testImplementation("io.micronaut:micronaut-inject-groovy")
+    testImplementation("org.spockframework:spock-core") {
+        exclude("org.codehaus.groovy:groovy-all")
+    }
 }
 
 application {

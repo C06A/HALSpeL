@@ -7,6 +7,7 @@ plugins {
 
     application
     maven
+    groovy
     kotlin("jvm")
     kotlin("kapt")
     id("io.spring.dependency-management")
@@ -16,7 +17,7 @@ plugins {
     id("com.vanniktech.dependency.graph.generator") version "0.5.0"
 }
 
-version = "1.3.1"
+version = "1.5.2"
 group = "hal.spel"
 
 val kotlinVersion: String by project
@@ -45,6 +46,9 @@ dependencies {
 
     compile("io.micronaut:micronaut-http-client")
 
+    compileOnly("io.micronaut:micronaut-inject-groovy")
+    implementation("io.micronaut:micronaut-runtime-groovy")
+
     compile("com.github.kittinunf.fuel:fuel:$flue_version") //for JVM
     compile("com.github.kittinunf.fuel:fuel-jackson:$flue_version") //for json support
 
@@ -52,7 +56,7 @@ dependencies {
 
     compile("com.helpchoice.kotlin:koton:1.1.6")
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.5.1")
+    compile("hal.spel:hal-spel:1.5.2")
 
     compile("org.slf4j:slf4j-api:1.7.25")
 
@@ -65,6 +69,11 @@ dependencies {
     testCompile("io.micronaut.test:micronaut-test-junit5")
     testRuntime("org.junit.jupiter:junit-jupiter-engine")
     testRuntime("org.jetbrains.spek:spek-junit-platform-engine:1.1.5")
+
+    testImplementation("io.micronaut:micronaut-inject-groovy")
+    testImplementation("org.spockframework:spock-core") {
+        exclude("org.codehaus.groovy:groovy-all")
+    }
 }
 
 application {

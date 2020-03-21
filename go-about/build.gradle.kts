@@ -10,7 +10,7 @@ plugins {
     id("com.github.johnrengelman.shadow")
 }
 
-version = "0.1"
+version = "1.5.2"
 group = "go.about"
 
 val kotlinVersion: String by project
