@@ -27,22 +27,28 @@ class Oxford {
             halSpeL("/"
                     , type = MediaType.APPLICATION_HAL_JSON
                     , rel = "entryPoint"
-            ).FETCH(aspect = makePostADocTagAspect(reporter
-                    , *POST_PARTS.values()
-                    , aspect = makePreADocTagAspect(reporter, PRE_PARTS.REL, PRE_PARTS.LINK, aspect = aspect))
             ).apply {
-                FETCH("app:contacts")
-                FETCH("app:courses"
+                FETCH(aspect = makePostADocTagAspect(reporter
+                        , *POST_PARTS.values()
+                        , aspect = makePreADocTagAspect(reporter, PRE_PARTS.REL, PRE_PARTS.LINK, aspect = aspect))
+                ).FETCH("app:contacts")
+
+                FETCH(aspect = makePostADocTagAspect(reporter
+                        , *POST_PARTS.values()
+                        , aspect = makePreADocTagAspect(reporter, PRE_PARTS.REL, PRE_PARTS.LINK, aspect = aspect))
                 ).apply {
-                    FETCH("hl:course", "id" to 10)
+                    FETCH("app:courses"
+                    ).apply {
+                        FETCH("hl:course", "id" to 10)
 
-                    FETCH("hl:subjects"
-                    ).FETCH("courses:subject", 0)
+                        FETCH("hl:subjects"
+                        ).FETCH("courses:subject", 0)
 
-                    FETCH("hl:search", "q" to "Russian")
+                        FETCH("hl:search", "q" to "Russian")
+                    }
+
+                    FETCH("app:library")
                 }
-
-                FETCH("app:library")
             }
         }
     }

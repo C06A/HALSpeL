@@ -47,6 +47,13 @@ class OxfordJ {
 
         resource.FETCH("app:contacts");
 
+        resource = HalKt.FETCH(entrance, Collections.emptyMap(), null
+                , ADocTagAspectKt.makePostADocTagAspect(reporter
+                        , POST_PARTS.values()
+                        , ADocTagAspectKt.makePreADocTagAspect(reporter, preParts, aspect))
+                , null
+        );
+
         Resource resource1 = resource.FETCH("app:courses");
 
         resource1.FETCH("hl:course", Collections.singletonMap("id", 10));

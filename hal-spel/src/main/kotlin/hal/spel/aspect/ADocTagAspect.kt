@@ -15,124 +15,118 @@ private val jackson = ObjectMapper()
 private var counters = mutableMapOf<String, Int>()
 private var relation: String? = null
 
+private fun <T> formatTag(tagName: String, obj: T?, reporter: (String) -> Unit) {
+    when (obj) {
+        is Map<*, *> -> reporter("""
+                |#tag::$relation-$tagName-${counters[relation]}[]
+                |${obj.filterValues { it != null }.map { (key, value) ->
+            "$key:\t$value"
+        }.joinToString("\n|\t", "{\n|\t", "\n|}")}
+                |#end::$relation-$tagName-${counters[relation]}[]
+                """.trimMargin())
+        is Collection<*> ->
+            reporter("""
+                |#tag::$relation-$tagName-${counters[relation]}[]
+                |${obj.joinToString("\n|\t", "\t")}
+                |#end::$relation-$tagName-${counters[relation]}[]
+                """.trimMargin())
+        else -> reporter("#tag::$relation-$tagName-${counters[relation]}[]"
+                + "\n${obj ?: ""}"
+                + "\n#end::$relation-$tagName-${counters[relation]}[]"
+        )
+    }
+}
+
+/**
+ * AsciiDoc preRequest aspect definitions
+ *
+ * This Map defines the aspect making functions for different parts of [Link] object.
+ *
+ * The maker for [PRE_PARTS.REL] keeps track of similar requests and assigns unique number to make an AsciiDoc tag unique.
+ * If this aspect won't be included in an aspect chain the [null] will be used instead of numbers and all segments
+ * of AsciiDoc will have identical tags. It is recommended to always include [PRE_PARTS.REL] aspect even if the
+ * corresponding segment won't ne used in the final documentation.
+ *
+ *
+ */
 val preADocTagFormatter = mapOf<PRE_PARTS, (Link, (String) -> Unit) -> Unit>(
         PRE_PARTS.REL to { link, reporter ->
-            relation = link.rel
-            relation?.apply {
+            // Assign next available number to make a unique AsciiDoc tag
+            relation = link.rel?.apply {
                 counters[this] = counters[this]?.let {
                     it + 1
                 } ?: 1
             }
+            formatTag("ref", link.rel, reporter)
         },
         PRE_PARTS.LINK to { link, reporter ->
-            reporter("""
-                |#tag::$relation-link-${counters[relation]}[]
-                |${link.toMap().filterValues { it != null }.map { (key, value) ->
-                "$key:\t$value"
-            }.joinToString("\n|\t", "{", "\n|}")}
-                |#end::$relation-link-${counters[relation]}[]
-                """.trimMargin())
+            formatTag("link", link.toMap(), reporter)
         },
         PRE_PARTS.URI to { link, reporter ->
-            reporter("""
-                #tag::$relation-URI-${counters[relation]}[]
-                ${link.href}
-                #end::$relation-URI-${counters[relation]}[]
-                """.trimIndent())
+            formatTag("URI", link.href, reporter)
+        },
+        PRE_PARTS.NAME to { link, reporter ->
+            formatTag("name", link.name, reporter)
+        },
+        PRE_PARTS.TITLE to { link, reporter ->
+            formatTag("title", link.title, reporter)
+        },
+        PRE_PARTS.TYPE to { link, reporter ->
+            formatTag("type", link.type, reporter)
         }
 )
 
 val postADocTagFormatter = mapOf<POST_PARTS, (Answer, (String) -> Unit) -> Unit>(
         POST_PARTS.URL to { answer, reporter ->
-            reporter("""
-                #tag::$relation-URL-${counters[relation]}[]
-                ${answer.response.url}
-                #end::$relation-URL-${counters[relation]}[]
-                """.trimIndent())
+            formatTag("URL", answer.response.url.toString(), reporter)
         },
         POST_PARTS.CURL to { answer, reporter ->
-            if (answer.request.method == Method.GET || answer.request.header(Headers.CONTENT_TYPE).contains("json")) {
-                reporter("""
-                |#tag::$relation-curl-${counters[relation]}[]
-                |${answer.request.cUrlString()}
-                |#end::$relation-curl-${counters[relation]}[]
-                """.trimMargin())
-            }
+            formatTag("curl", answer.request.cUrlString(), reporter)
         },
         POST_PARTS.HEADERS_OUT to { answer, reporter ->
-            reporter("""
-                |#tag::$relation-headersOut-${counters[relation]}[]
-                |${answer.request.headers.map { (key, value) ->
-                "\t$key:\t${value.joinToString("\n|\t\t")}"
-            }.joinToString("\n|")}
-                |#end::$relation-headersOut-${counters[relation]}[]
-                """.trimMargin())
+            formatTag("headerOut", answer.request.headers, reporter)
         },
         POST_PARTS.COOKIES_OUT to { answer, reporter ->
-            reporter("""
-                |#tag::$relation-cookieOut-${counters[relation]}[]
-                |${answer.request["Set-Cookies"].joinToString("\n|\t")}
-                |#end::$relation-cookieOut-${counters[relation]}[]
-                """.trimMargin())
+            formatTag("cookieOut", answer.request["Set-Cookies"], reporter)
         },
         POST_PARTS.BODY_OUT to { answer, reporter ->
-            reporter("#tag::$relation-bodyOut-${counters[relation]}[]")
             if (answer.request.body.isConsumed()) {
-                reporter("${answer.request.body.length}")
+                formatTag("bodyOut", "Size: ${answer.request.body.length}", reporter)
             } else {
                 answer.request.body.let {
-                    when (it) {
-                        is RepeatableBody -> if(it.toByteArray().size > 0) {
-                            reporter("Size: ${it.toByteArray().size}")
+                    if (it is RepeatableBody) {
+                        if (it.toByteArray().size > 0) {
+                            formatTag("bodyOut", "Size: ${it.toByteArray().size}", reporter)
                         } else {
-                            reporter("${answer.request.body.asString(null)}")
+                            formatTag("bodyOut", answer.request.body.asString(null), reporter)
                         }
-                        else -> reporter("${answer.request.body.asString(null)}")
+                    } else {
+                        formatTag("bodyOut", answer.request.body.asString(null), reporter)
                     }
                 }
             }
-            reporter("#end::$relation-bodyOut-${counters[relation]}[]")
         },
         POST_PARTS.STATUS to { answer, reporter ->
-            reporter("""
-                #tag::$relation-status-${counters[relation]}[]
-                ${answer.status.code} (${answer.status})
-                #end::$relation-status-${counters[relation]}[]
-                """.trimIndent())
+            formatTag("status", "${answer.status.code} (${answer.status})", reporter)
         },
         POST_PARTS.HEADERS_IN to { answer, reporter ->
-            reporter("""
-                |#tag::$relation-headersIn-${counters[relation]}[]
-                |${answer.response.headers.map { (key, value) ->
-                "\t$key:\t${value.joinToString("\n|\t")}"
-            }.joinToString("\n|")}
-                |#end::$relation-headersIn-${counters[relation]}[]
-                """.trimMargin())
+            formatTag("headersIn", answer.response.headers, reporter)
         },
         POST_PARTS.COOKIES_IN to { answer, reporter ->
-            reporter("""
-                |#tag::$relation-cookiesIn-${counters[relation]}[]
-                |${answer.response["Cookies"].joinToString("\n|\t")}
-                |#end::$relation-cookiesIn-${counters[relation]}[]
-                """.trimMargin())
+            formatTag("cookiesIn", answer.response["Cookies"], reporter)
         },
         POST_PARTS.BODY_IN to { answer, reporter ->
-            reporter("""
-                |#tag::$relation-bodyIn-${counters[relation]}[]
-                ${
-            when (answer.status.code) {
+            formatTag("bodyIn", when (answer.status.code) {
                 in (200..299) ->
                     if (answer.response.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
-                        "|${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(answer.body)}"
+                        jackson.writerWithDefaultPrettyPrinter().writeValueAsString(answer.body)
                     } else {
                         val head = min(answer.response.contentLength, UNSTRUCTURED_HEAD_LENGTH)
-                        "|(length: ${answer.response.contentLength})\n${String(answer.response.data).substring(0, head.toInt())}"
+                        "(length: ${answer.response.contentLength})\n${String(answer.response.data).substring(0, head.toInt())}"
                     }
                 HttpStatus.FOUND.code -> "|Redirection to: ${answer.response.header("Location").first()}"
-                else -> "|${answer.body?.toJson()}"
-            }}
-                |#end::$relation-bodyIn-${counters[relation]}[]
-                """.trimMargin())
+                else -> "${answer.body?.toJson()}"
+            }, reporter)
         }
 )
 

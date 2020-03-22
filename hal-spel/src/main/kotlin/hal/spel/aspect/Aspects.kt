@@ -21,7 +21,6 @@ fun makeDefaultAspectIfNull(aspect: Aspect?): Aspect {
 enum class PRE_PARTS {
     REL,
     LINK,
-    HREF,
     TYPE,
     TITLE,
     NAME,

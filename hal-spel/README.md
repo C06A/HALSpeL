@@ -4,7 +4,7 @@ This Kotlin DSL wrapper of Fuel library allowing to access HAL server as collect
 It requires minimal coupling between Client and Server.
 
 [![license](https://img.shields.io/github/license/C06A/HALSpeL.svg)](https://github.com/C06A/HALSpeL/blob/master/LICENSE)
-[![Download Latest](https://img.shields.io/badge/download-1.5.1-green.svg)](https://github.com/C06A/HALSpeL/releases/download/v1.2.4/hal-spel-1.2.4.jar)
+[![Download Latest](https://img.shields.io/badge/download-1.5.2-green.svg)](https://github.com/C06A/HALSpeL/releases/download/v1.5.2/hal-spel-1.5.2.jar)
 
 
 The [HAL standard](https://en.wikipedia.org/wiki/Hypertext_Application_Language) is an extension of the REST API. This means that each URL endpoint points to the Resource,
