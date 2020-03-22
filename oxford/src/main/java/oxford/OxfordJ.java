@@ -18,7 +18,7 @@ import java.util.Map;
 class OxfordJ {
     static String entry = "http://api.m.ox.ac.uk";
 
-    static Function2<? super Link, ? super Function1<? super Link,Answer>, Answer> aspect = (link, aspect) -> {
+    static Function2<? super Link, ? super Function1<? super Link, Answer>, Answer> aspect = (link, aspect) -> {
         Link newLink = new Link(entry + link.getHref(), link.getTemplated(), link.getType()
                 , link.getDescription(), link.getName(), link.getProfile()
                 , link.getTitle(), link.getHreflang(), link.getRel());
@@ -54,7 +54,7 @@ class OxfordJ {
         Resource resource2 = resource1.FETCH("hl:subjects");
         resource2.FETCH("courses:subject", 0);
 
-        resource1.FETCH("hl:search", Collections.singletonMap("q","Russian"));
+        resource1.FETCH("hl:search", Collections.singletonMap("q", "Russian"));
 
         resource.FETCH("app:library");
     }

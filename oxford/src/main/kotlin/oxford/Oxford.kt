@@ -34,8 +34,9 @@ class Oxford {
                 FETCH("app:contacts")
                 FETCH("app:courses"
                 ).apply {
-                    FETCH("hl:course", "id" to 10
-                    ).FETCH("hl:subjects"
+                    FETCH("hl:course", "id" to 10)
+
+                    FETCH("hl:subjects"
                     ).FETCH("courses:subject", 0)
 
                     FETCH("hl:search", "q" to "Russian")

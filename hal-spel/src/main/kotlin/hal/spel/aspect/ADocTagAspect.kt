@@ -85,9 +85,9 @@ val postADocTagFormatter = mapOf<POST_PARTS, (Answer, (String) -> Unit) -> Unit>
                         is RepeatableBody -> if(it.toByteArray().size > 0) {
                             reporter("Size: ${it.toByteArray().size}")
                         } else {
-                            reporter("Body object: ${answer.request.body}")
+                            reporter("${answer.request.body.asString(null)}")
                         }
-                        else -> reporter("Body object: ${answer.request.body}")
+                        else -> reporter("${answer.request.body.asString(null)}")
                     }
                 }
             }
