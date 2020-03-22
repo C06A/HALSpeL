@@ -47,7 +47,7 @@ dependencies {
 
     compile(project(":fuel-spel"))
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.5.1")
+    compile("hal.spel:hal-spel:1.5.2")
 
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")
