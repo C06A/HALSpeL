@@ -20,17 +20,12 @@ version = "1.5.2"
 group = "hal.spel"
 
 val kotlinVersion: String by project
+val micronautVersion: String by project
 val flue_version: String by project
 
 repositories {
     mavenCentral()
     jcenter()
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("io.micronaut:micronaut-bom:1.3.0")
-    }
 }
 
 val developmentOnly by configurations.creating
@@ -40,6 +35,7 @@ configurations {
 }
 
 dependencies {
+    implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 
