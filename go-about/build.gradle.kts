@@ -10,7 +10,7 @@ plugins {
     id("com.github.johnrengelman.shadow")
 }
 
-version = "1.5.2"
+version = "1.5.3"
 group = "go.about"
 
 val kotlinVersion: String by project
@@ -47,7 +47,7 @@ dependencies {
 
     compile(project(":fuel-spel"))
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.5.2")
+    compile("hal.spel:hal-spel:1.5.3")
 
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")

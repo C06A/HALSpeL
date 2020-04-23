@@ -17,21 +17,16 @@ plugins {
     id("com.vanniktech.dependency.graph.generator") version "0.5.0"
 }
 
-version = "1.5.2"
+version = "1.5.3"
 group = "hal.spel"
 
 val kotlinVersion: String by project
+val micronautVersion: String by project
 val flue_version: String by project
 
 repositories {
     mavenCentral()
     jcenter()
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("io.micronaut:micronaut-bom:1.3.0")
-    }
 }
 
 val developmentOnly by configurations.creating
@@ -41,6 +36,7 @@ configurations {
 }
 
 dependencies {
+    implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 
@@ -56,7 +52,7 @@ dependencies {
 
     compile("com.helpchoice.kotlin:koton:1.1.6")
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.5.2")
+    compile("hal.spel:hal-spel:1.5.3")
 
     compile("org.slf4j:slf4j-api:1.7.25")
 
