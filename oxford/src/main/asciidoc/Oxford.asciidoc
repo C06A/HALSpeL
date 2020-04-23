@@ -1,0 +1,61 @@
+== AsciiDoc Documentation for Oxford
+
+This module demonstrate one of the way to generate up-to-date documentation with the real life examples data.
+To do that HALSpeL includes a couple aspect making functions, which record configured sections
+of the requests and responses into file as individual tagged segments ready to be included into AsciiDoc document.
+
+Each tag name is automatically built from 3 elements separated by dash ("**-**"):
+
+* the relation of the link
+* the part of request/response (kind of data) in this tag
+* sequence number in case the same link was used multiple times
+
+For example the CURL-command equivalent of the request:
+
+**
+include::../../../build/asciidoc/Oxford-includes.asciidoc[tag=entryPoint-curl-1]
+**
+
+can be included with instruction like:
+
+```
+include::../../../build/asciidoc/Oxford-includes.asciidoc[tag=entryPoint-curl-1]
+```
+
+The body of the response can be included as section of the JSON source code.
+
+[source,json]
+----
+include::../../../build/asciidoc/Oxford-includes.asciidoc[tag=app:contacts-bodyIn-1]
+----
+
+The part of the AsciiDoc document doing that may look like
+
+```
+    [source,json]
+    ----
+    include::../../../build/asciidoc/Oxford-includes.asciidoc[tag=app:contacts-bodyIn-1]
+    ----
+```
+
+Also document can include marked segments of the source code. For example the code reporting segments into log file
+defined by the function:
+
+[source]
+----
+include::../kotlin/oxford/Oxford.kt[tag=stdoutReporter]
+----
+
+IMPORTANT: This segment defines a value of type function.
+
+
+In order to turn on syntactic highlighting surround the include instruction into *[source]* block with appropriate language.
+For example function to write segments into AsciiDoc include file looks like:
+
+[source,java]
+----
+include::../kotlin/oxford/Oxford.kt[tag=fileReporter]
+----
+
+CAUTION: If process generating include file failed the process of documentation generation may finish succesfully,
+but resulting document will include incorrect data or no data at all.

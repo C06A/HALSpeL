@@ -21,7 +21,7 @@ private fun <T> formatTag(tagName: String, obj: T?, reporter: (String) -> Unit) 
                 |#tag::$relation-$tagName-${counters[relation]}[]
                 |${obj.filterValues { it != null }.map { (key, value) ->
             "$key:\t$value"
-        }.joinToString("\n|\t", "{\n|\t", "\n|}")}
+        }.joinToString("\n|\t", "\t")}
                 |#end::$relation-$tagName-${counters[relation]}[]
                 """.trimMargin())
         is Collection<*> ->

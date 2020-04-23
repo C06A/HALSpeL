@@ -7,6 +7,7 @@ import hal.spel.aspect.*
 import hal.spel.halSpeL
 import io.micronaut.http.MediaType
 import org.slf4j.LoggerFactory
+import java.io.File
 
 class Oxford {
     companion object {
@@ -20,7 +21,20 @@ class Oxford {
             ).it()
         }
 
-        val reporter: (String) -> Unit = { println(); println(it) }
+        // tag::stdoutReporter[]
+        val reporterLoger: (String) -> Unit = { println(); println(it) }
+        // end::stdoutReporter[]
+
+        val folderPath = "oxford/build/asciidoc"
+        val folderFile = File(folderPath).apply { mkdirs() }
+        val fileName = "Oxford-includes.asciidoc"
+
+        // tag::fileReporter[]
+        val fileWriter = File(folderFile, fileName).printWriter()
+        val reporter: (String) -> Unit = {
+            fileWriter.println(it)
+        }
+        // end::fileReporter[]
 
         @JvmStatic
         fun main(vararg args: String) {
@@ -28,9 +42,15 @@ class Oxford {
                     , type = MediaType.APPLICATION_HAL_JSON
                     , rel = "entryPoint"
             ).apply {
-                FETCH(aspect = makePostADocTagAspect(reporter
+                FETCH(aspect = makePreADocTagAspect(reporter
+                        , PRE_PARTS.REL, PRE_PARTS.LINK
+                        , aspect = makePostADocTagAspect(reporter
                         , *POST_PARTS.values()
-                        , aspect = makePreADocTagAspect(reporter, PRE_PARTS.REL, PRE_PARTS.LINK, aspect = aspect))
+                        , aspect = makePostLoggerAspect(reporterLoger
+                        , POST_PARTS.CURL
+                        , aspect = makePreLoggerAspect(reporterLoger
+                        , PRE_PARTS.URI, aspect = aspect)
+                )))
                 ).FETCH("app:contacts")
 
                 FETCH(aspect = makePostADocTagAspect(reporter

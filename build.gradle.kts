@@ -6,7 +6,7 @@ plugins {
     kotlin("kapt") version "1.3.60"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.3.60"
     id("com.github.johnrengelman.shadow") version "4.0.2"
-    id("io.spring.dependency-management") version "1.0.6.RELEASE"
+    id("io.spring.dependency-management") version "1.0.9.RELEASE"
 }
 
 version = "0.3"

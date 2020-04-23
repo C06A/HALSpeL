@@ -1,5 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.internal.JavaJarExec
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.asciidoctor.gradle.jvm.AsciidoctorTask
 
 plugins {
     application
@@ -9,23 +11,22 @@ plugins {
     id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.plugin.allopen")
     id("com.github.johnrengelman.shadow")
+    id("org.asciidoctor.jvm.base") version "3.2.0"
+    id("org.asciidoctor.jvm.convert") version "3.2.0"
+    id("org.asciidoctor.jvm.pdf") version "3.2.0"
+    id("org.asciidoctor.jvm.epub") version "3.2.0"
 }
 
-version = "1.5.2"
+version = "1.5.3"
 group = "oxford"
 
 val kotlinVersion: String by project
+val micronautVersion: String by project
 val flue_version: String by project
 
 repositories {
     mavenCentral()
     jcenter()
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("io.micronaut:micronaut-bom:1.2.2")
-    }
 }
 
 configurations {
@@ -36,6 +37,7 @@ configurations {
 }
 
 dependencies {
+    implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     compile("io.micronaut:micronaut-management")
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -54,6 +56,7 @@ dependencies {
     compileOnly("io.micronaut:micronaut-inject-groovy")
     implementation("io.micronaut:micronaut-runtime-groovy")
 
+    kapt(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")
     kaptTest("io.micronaut:micronaut-inject-java")
@@ -77,7 +80,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "oxford.Application"
+    mainClassName = "oxford.Oxford"
 }
 
 allOpen {
@@ -98,7 +101,13 @@ tasks.withType(KotlinCompile::class) {
 val run: JavaExec by tasks
 run.apply {
     //run.classpath += configurations.developmentOnly
+    workingDir = rootDir
     jvmArgs("-noverify", "-XX:TieredStopAtLevel=1", "-Dcom.sun.management.jmxremote")
+}
+
+val runShadow: JavaJarExec by tasks
+runShadow.apply {
+    workingDir = rootDir
 }
 
 //// use JUnit 5 platform
@@ -106,4 +115,15 @@ val test: Test by tasks
 test.apply {
     useJUnitPlatform()
 //test.classpath += configurations.developmentOnly
+}
+
+val asciidoctor: AsciidoctorTask by tasks
+asciidoctor.apply {
+    baseDirFollowsSourceFile()
+    logDocuments = true
+    sourceDir("src/main/asciidoc")
+
+    outputOptions {
+        backends("html5", "pdf")
+    }
 }
