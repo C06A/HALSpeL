@@ -61,9 +61,7 @@ fun makePostFunctionAspect(vararg func: AnswerFun, aspect: Aspect?): Aspect {
     return {
         makeDefaultAspectIfNull(aspect)(it).apply {
             func.forEach { reporter ->
-                reporter?.let {
-                    it(this)
-                }
+                reporter(this)
             }
         }
     }

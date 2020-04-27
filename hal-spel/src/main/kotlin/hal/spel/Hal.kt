@@ -120,9 +120,7 @@ fun Link.CREATE(
     tail?.let {
         answer.tail()
     }
-    return answer()?.let {
-        Resource(it, aspect)
-    } ?: null
+    return Resource(answer(), aspect)
 }
 
 /**
@@ -153,20 +151,21 @@ class Resource(
     val resources: Collection<String>
         inline get() = koton<Map<String, Any>>(RESOURCES)?.keys ?: emptySet()
 
+    @Suppress("UNCHECKED_CAST")
     val attributes: Collection<String>
         inline get() = koton().run {
             when (this) {
                 is Map<*, *> -> (this as Map<String, Any>).run {
                     keys - ACTIONS - RESOURCES
-                } ?: emptyList()
+                }
                 is Collection<*> -> this as Collection<String>
                 else -> emptyList()
             }
         }
 
-    inline operator fun get(index: Int): KotON<Any> = koton[index]
+    operator fun get(index: Int): KotON<Any> = koton[index]
 
-    inline operator fun get(rel: String, vararg path: String): KotON<Any> {
+    operator fun get(rel: String, vararg path: String): KotON<Any> {
         return when (rel) {
             ACTIONS, RESOURCES -> throw IllegalArgumentException("There are no attribute with name '$rel'")
             else -> koton.get(rel, *path)
@@ -226,9 +225,7 @@ class Resource(
         tail?.let {
             this.tail()
         }
-        return this()?.let {
-            Resource(it, aspect)
-        }
+        return Resource(this(), aspect)
     }
 
     /**
@@ -508,7 +505,7 @@ class Resource(
     fun UPDATE(link: String? = null, params: Map<String, Any?> = emptyMap(), body: KotON<*>, headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { PATCH(headers = headers, body = body.toJson()) }
+                .aspect { PATCH(*(params.toList().toTypedArray()), headers = headers, body = body.toJson()) }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -551,7 +548,7 @@ class Resource(
     fun REMOVE(link: String? = null, params: Map<String, Any?> = emptyMap(), headers: Headers? = null
                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { DELETE(headers = headers) }
+                .aspect { DELETE(*(params.toList().toTypedArray()), headers = headers) }
                 .execute(tail)
                 ?: Resource(kotON())
     }

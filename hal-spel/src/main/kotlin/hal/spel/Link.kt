@@ -87,7 +87,7 @@ data class Link(
         return Answer(
                 communicate(params, headers = headers) {
                     httpPost().run {
-                        body?.let { body(body) } ?: this
+                        body(body)
                     }
                 }
         )

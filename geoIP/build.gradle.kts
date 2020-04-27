@@ -17,7 +17,7 @@ plugins {
     id("com.vanniktech.dependency.graph.generator") version "0.5.0"
 }
 
-version = "1.5.3"
+version = "1.5.4"
 group = "hal.spel"
 
 val kotlinVersion: String by project
@@ -52,7 +52,7 @@ dependencies {
 
     compile("com.helpchoice.kotlin:koton:1.1.6")
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.5.3")
+    compile("hal.spel:hal-spel:1.5.4")
 
     compile("org.slf4j:slf4j-api:1.7.25")
 

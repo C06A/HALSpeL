@@ -17,7 +17,7 @@ plugins {
     id("org.asciidoctor.jvm.epub") version "3.2.0"
 }
 
-version = "1.5.3"
+version = "1.5.4"
 group = "oxford"
 
 val kotlinVersion: String by project
@@ -51,7 +51,7 @@ dependencies {
 
     compile(project(":fuel-spel"))
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.5.3")
+    compile("hal.spel:hal-spel:1.5.4")
 
     compileOnly("io.micronaut:micronaut-inject-groovy")
     implementation("io.micronaut:micronaut-runtime-groovy")
