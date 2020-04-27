@@ -39,7 +39,7 @@ dependencies {
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 
-    compile("io.micronaut:micronaut-http-client")
+    compile("io.micronaut:micronaut-http-client:$micronautVersion")
 
     compile("com.github.kittinunf.fuel:fuel:$flue_version") //for JVM
     compile("com.github.kittinunf.fuel:fuel-jackson:$flue_version") //for json support
