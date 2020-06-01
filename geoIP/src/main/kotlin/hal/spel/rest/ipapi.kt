@@ -5,7 +5,6 @@ import hal.spel.*
 import io.micronaut.http.HttpStatus
 
 fun main(vararg args: String) {
-    var myId: String? = null
 
     halSpeL("https://ipapi.co{/ip,field}"
             , templated = true

@@ -4,12 +4,12 @@ This Kotlin DSL wrapper of Fuel library allowing to access HAL server as collect
 It requires minimal coupling between Client and Server.
 
 [![license](https://img.shields.io/github/license/C06A/HALSpeL.svg)](https://github.com/C06A/HALSpeL/blob/master/LICENSE)
-[![Download Latest](https://img.shields.io/badge/download-1.5.2-green.svg)](https://github.com/C06A/HALSpeL/releases/download/v1.5.2/hal-spel-1.5.2.jar)
+[![Download Latest](https://img.shields.io/badge/download-1.6.0-green.svg)](https://github.com/C06A/HALSpeL/releases/download/v1.6.0/hal-spel-1.6.0.jar)
 
 
 The [HAL standard](https://en.wikipedia.org/wiki/Hypertext_Application_Language) is an extension of the REST API. This means that each URL endpoint points to the Resource,
 which can be created, retrieved, updated and deleted. In order to use regular REST API the Client should
-somehow build URL for each endpoint. This strongly coupling Client and Server. 
+somehow build URL for each endpoint. This strongly couples Client and Server. 
 
 In contrast to REST fully implemented HAL standard allows Client to do not "know" any server's URL endpoints,
 but discover them from other Resources. The only endpoint Client should have is the main entry point -- base
@@ -23,7 +23,7 @@ it into build file add:
 
 ```androiddatabinding
 dependencies {
-    compile("hal.spel:hal-spel:1.5.1")
+    compile("hal.spel:hal-spel:1.6.0")
 }
 ``` 
 
@@ -36,7 +36,7 @@ In some rare cases Client may access Answer object which contains request, respo
 
 ### Actions on Resource
 
-The Client can call one or more follow chain methods on any Resource which supports them:
+The Client can call one or chain of multiple follow methods on any Resource which supports them:
 
 * `FETCH` -- to request existing Resource from the Server
 * `CREATE` -- to pass to the Server data to create a new Resource
@@ -89,7 +89,7 @@ this call will throw cast exception.
 The function `halSpeL(...)` expects the Server's entry point URL and optionally values for Content Type and Templated flag.
 It also accepts the `rel` value, which can be used for reporting.
 
-The returned value accepts the chain method `FETCH` or `CREATE`. Both are similar to corresponding methods of the Resource,
+The returned value accepts the chain methods `FETCH` or `CREATE`. Both are similar to corresponding methods of the Resource,
 but do not expect the first parameter (relation).
 
 For example:
@@ -178,6 +178,27 @@ Sample code demonstrates how use AOP closure defined as a variable `aopClosure`:
                     FETCH("app:events")
                 }
 ```
+
+### Logging Aspect Factory class
+
+In order to simplify the logging of different parts of HTTP interactions with Server this wrapper provides a specially
+designed class `LoggerFormatter`. Its constructor receives configuring parameters and method to build an aspect function.
+
+Constructor expects the reporting function, list of elements from enum `ReportPart` and optional instance of another
+`AspectFormatter` to chain them. In order to report at different level build the chian of `LoggerFormatter` with
+corresponding reporting method of the logger and list of parts to report at this level. For example check the module
+`go-about` in this repository. Also reporting function can be simple function printing String into STDOUT
+or saving into the file.
+
+### AsciiDoctor Tags Aspect Factory class
+
+Another similar class `ADocTagFormatter` reporting the text for each part which is ready to be imported into AsciiDoctor document.
+
+This class's constructor accepts as a first parameter a PrintWriter to print AsciiDoctor tag text to. This writer
+could append text into the file or STDOUT for debugging purpose.
+
+Later AsciiDoctor Gradle plugin can build the final documentation including chunks of real life communications into
+the body of the documentation.
 
 ## Usecases for low level DSL
 

@@ -7,6 +7,9 @@ import java.io.File
 import java.lang.IllegalArgumentException
 import com.helpchoice.kotlin.koton.KotON
 import com.helpchoice.kotlin.koton.kotON
+import hal.spel.aspect.Aspect
+import hal.spel.aspect.AspectFormatter
+import hal.spel.aspect.makeDefaultAspectIfNull
 import java.lang.Exception
 import java.lang.NullPointerException
 import java.util.*
@@ -55,10 +58,10 @@ fun Link.FETCH(
 fun Link.FETCH(
         params: Map<String, Any?>
         , headers: Headers? = null
-        , aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
+        , aspect: Aspect? = null
         , tail: (Answer.() -> Unit)? = null
 ): Resource {
-    val answer = aspect {
+    val answer = makeDefaultAspectIfNull(aspect).invoke(this) {
         GET(params, headers = headers)
     }
     tail?.let {
@@ -134,8 +137,10 @@ fun Link.CREATE(
  */
 class Resource(
         val koton: KotON<Any>
-        , var aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
+        , var aspect: (Link.(Link.() -> Answer) -> Answer)? = null
 ) {
+    constructor(koton: KotON<Any>, formatter: AspectFormatter) : this(koton, formatter.makeAspect())
+
     operator fun invoke(rel: String, index: Int? = null): Resource = Resource(
             index?.let {
                 koton[RESOURCES, rel][index]
@@ -241,7 +246,7 @@ class Resource(
      */
     @JvmOverloads
     fun FETCH(link: String? = null, index: Int, vararg params: Pair<String, Any?>, headers: Headers? = null
-              , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+              , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return FETCH(link, index, params.toMap(), headers, aspect, tail)
     }
 
@@ -257,7 +262,7 @@ class Resource(
      */
     @JvmOverloads
     fun FETCH(link: String? = null, vararg params: Pair<String, Any?>, headers: Headers? = null
-              , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+              , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return FETCH(link, null, params.toMap(), headers, aspect, tail)
     }
 
@@ -273,7 +278,7 @@ class Resource(
      */
     @JvmOverloads
     fun FETCH(link: String? = null, index: Int? = null, params: Map<String, Any?>, headers: Headers? = null
-              , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+              , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self", index).FETCH(params, headers = headers, aspect = aspect, tail = tail)
     }
 
@@ -290,7 +295,7 @@ class Resource(
      */
     @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, body: KotON<*>, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, params.toMap(), body.toJson(), headers, aspect, tail)
     }
 
@@ -307,7 +312,7 @@ class Resource(
      */
     @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, params.toMap(), body, headers, aspect, tail)
     }
 
@@ -324,9 +329,13 @@ class Resource(
      */
     @JvmOverloads
     fun CREATE(link: String? = null, params: Map<String, Any?>, body: KotON<*>, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { POST(params, headers = headers, body = body.toJson()) }
+                .let {
+                    makeDefaultAspectIfNull(aspect).invoke(it) {
+                        POST(params, headers = headers, body = body.toJson())
+                    }
+                }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -344,9 +353,13 @@ class Resource(
      */
     @JvmOverloads
     fun CREATE(link: String? = null, params: Map<String, Any?>, body: String, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { POST(params, headers = headers, body = body) }
+                .let {
+                    makeDefaultAspectIfNull(aspect).invoke(it) {
+                        POST(params, headers = headers, body = body)
+                    }
+                }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -365,9 +378,13 @@ class Resource(
      */
     @JvmOverloads
     fun CREATE(link: String? = null, params: Map<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { POST(params, headers = headers, source = source, length = length) }
+                .let {
+                    makeDefaultAspectIfNull(aspect).invoke(it) {
+                        POST(params, headers = headers, source = source, length = length)
+                    }
+                }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -385,7 +402,7 @@ class Resource(
      */
     @JvmOverloads
     fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, body: KotON<*>, headers: Headers? = null
-                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+                , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return REPLACE(link, *params, body = body.toJson(), headers = headers, aspect = aspect, tail = tail)
     }
 
@@ -402,9 +419,13 @@ class Resource(
      */
     @JvmOverloads
     fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, body: String, headers: Headers? = null
-                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+                , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { PUT(*params, headers = headers, body = body) }
+                .let {
+                    makeDefaultAspectIfNull(aspect).invoke(it) {
+                        PUT(*params, headers = headers, body = body)
+                    }
+                }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -423,9 +444,13 @@ class Resource(
      */
     @JvmOverloads
     fun REPLACE(link: String? = null, vararg params: Pair<String, Any?>, source: BodySource, length: BodyLength, headers: Headers? = null
-                , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+                , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { PUT(*params, headers = headers, source = source, length = length) }
+                .let {
+                    makeDefaultAspectIfNull(aspect).invoke(it) {
+                        PUT(*params, headers = headers, source = source, length = length)
+                    }
+                }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -443,7 +468,7 @@ class Resource(
      */
     @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, file: File, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, *params, files = mapOf(file to file.name), headers = headers, aspect = aspect, tail = tail)
     }
 
@@ -460,7 +485,7 @@ class Resource(
      */
     @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, files: Collection<File>, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return CREATE(link, *params, files = files.map {
             it to it.name
         }.toMap(), headers = headers, aspect = aspect, tail = tail)
@@ -479,13 +504,17 @@ class Resource(
      */
     @JvmOverloads
     fun CREATE(link: String? = null, vararg params: Pair<String, Any?>, files: Map<File, String>, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
 //        return PLACE(link, params.toMap(), files, tail)
 //    }
 //
 //    fun PLACE(link: String, params: Map<String, Any?>, files: Map<String, File>, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { UPLOAD(*params, headers = headers, files = files) }
+                .let {
+                    makeDefaultAspectIfNull(aspect).invoke(it) {
+                        UPLOAD(*params, headers = headers, files = files)
+                    }
+                }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -503,9 +532,13 @@ class Resource(
      */
     @JvmOverloads
     fun UPDATE(link: String? = null, params: Map<String, Any?> = emptyMap(), body: KotON<*>, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { PATCH(*(params.toList().toTypedArray()), headers = headers, body = body.toJson()) }
+                .let {
+                    makeDefaultAspectIfNull(aspect).invoke(it) {
+                        PATCH(*(params.toList().toTypedArray()), headers = headers, body = body.toJson())
+                    }
+                }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -523,14 +556,17 @@ class Resource(
      */
     @JvmOverloads
     fun FETCH(link: String, vararg params: Pair<String, Any?>, folder: File, headers: Headers? = null
-              , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+              , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         val linkObject = LINK(link)
-        linkObject.aspect { DOWNLOAD(*params, headers = headers, file = folder) }
-                .apply {
-                    tail?.let {
-                        this.it()
-                    }
-                }
+        linkObject.let {
+            makeDefaultAspectIfNull(aspect).invoke(it) {
+                DOWNLOAD(*params, headers = headers, file = folder)
+            }
+        }.apply {
+            tail?.let {
+                this.it()
+            }
+        }
         return this
     }
 
@@ -546,9 +582,13 @@ class Resource(
      */
     @JvmOverloads
     fun REMOVE(link: String? = null, params: Map<String, Any?> = emptyMap(), headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer) = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
+               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null): Resource {
         return LINK(link ?: "self")
-                .aspect { DELETE(*(params.toList().toTypedArray()), headers = headers) }
+                .let {
+                    makeDefaultAspectIfNull(aspect).invoke(it) {
+                        DELETE(*(params.toList().toTypedArray()), headers = headers)
+                    }
+                }
                 .execute(tail)
                 ?: Resource(kotON())
     }
@@ -563,6 +603,7 @@ class Answer(
     companion object {
         private val jackson = ObjectMapper()
     }
+
     val request
         get() = exchange.first
 

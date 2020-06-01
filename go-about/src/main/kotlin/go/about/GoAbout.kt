@@ -50,8 +50,8 @@ class GoAbout {
 
         halSpeL("https://api.goabout.com", rel = "entry")
                 .FETCH(aspect = makePostLoggerAspect(reporter
-                        , *(POST_PARTS.values().filter { it == POST_PARTS.BODY_OUT }.toTypedArray())
-                        , aspect = makePreLoggerAspect(reporter, *PRE_PARTS.values())))
+                        , *(ReportPart.values().filter { it == ReportPart.BODY_OUT }.toTypedArray())
+                        , aspect = makePreLoggerAspect(reporter, *ReportPart.values())))
                 .apply {
                     println("\nVersion: ${this["version"]()}. Build: ${this["build"]()}")
 //                    FETCH("http://openid.net/specs/connect/1.0/issuer")
@@ -60,7 +60,9 @@ class GoAbout {
                             .apply {
                                 println("Status: ${this["status"]<String>()}")
                             }
-                    FETCH("http://rels.goabout.com/geocoder", "query" to "all")
+                    FETCH("http://rels.goabout.com/geocoder", "query" to "all"
+                            , aspect = LoggerFormatter(log::warn, *ReportPart.values()).makeAspect()
+                    )
                             .apply {
                                 println("\nlocation object:")
                                 println(this("http://rels.goabout.com/location", 0))

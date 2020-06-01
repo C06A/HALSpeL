@@ -5,8 +5,8 @@ import hal.spel.HalKt
 import hal.spel.Link
 import hal.spel.Resource
 import hal.spel.aspect.ADocTagAspectKt
-import hal.spel.aspect.POST_PARTS
-import hal.spel.aspect.PRE_PARTS
+import hal.spel.aspect.ADocTagFormatter
+import hal.spel.aspect.ReportPart
 import io.micronaut.http.MediaType
 import kotlin.Unit
 import kotlin.jvm.functions.Function1
@@ -15,7 +15,7 @@ import kotlin.jvm.functions.Function2
 class OxfordG {
     static String entry = "http://api.m.ox.ac.uk"
 
-    static Function2<? super Link, ? super Function1<? super Link,Answer>, Answer> aspect = { link, aspect ->
+    static Function2<? super Link, ? super Function1<? super Link, Answer>, Answer> aspect = { link, aspect ->
         Link newLink = new Link(entry + link.href
                 , link.templated, link.type
                 , link.getDescription(), link.getName(), link.getProfile()
@@ -30,7 +30,7 @@ class OxfordG {
     }
 
     static void main(String... args) {
-        PRE_PARTS[] preParts = [ PRE_PARTS.REL, PRE_PARTS.LINK ]
+        ReportPart[] preParts = [ReportPart.REL, ReportPart.LINK]
 
         Link entrance = HalKt.halSpeL("/"
                 , MediaType.APPLICATION_HAL_JSON
@@ -38,17 +38,15 @@ class OxfordG {
         )
         Resource resource = HalKt.FETCH(entrance, Collections.emptyMap(), null
                 , ADocTagAspectKt.makePostADocTagAspect(reporter
-                        , POST_PARTS.values()
-                        , ADocTagAspectKt.makePreADocTagAspect(reporter, preParts, aspect))
+                , ReportPart.values()
+                , ADocTagAspectKt.makePreADocTagAspect(reporter, preParts, aspect))
                 , null
         )
 
         resource.FETCH("app:contacts")
 
         resource = HalKt.FETCH(entrance, Collections.emptyMap(), null
-                , ADocTagAspectKt.makePostADocTagAspect(reporter
-                , POST_PARTS.values()
-                , ADocTagAspectKt.makePreADocTagAspect(reporter, preParts, aspect))
+                , (new ADocTagFormatter(new PrintWriter(System.out), ReportPart.values(), null)).makeAspect(aspect)
                 , null
         )
 
@@ -59,7 +57,7 @@ class OxfordG {
         Resource resource2 = resource1.FETCH("hl:subjects")
         resource2.FETCH("courses:subject", 0)
 
-        resource1.FETCH("hl:search", Collections.singletonMap("q","Russian"))
+        resource1.FETCH("hl:search", Collections.singletonMap("q", "Russian"))
 
         resource.FETCH("app:library")
     }

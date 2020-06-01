@@ -6,7 +6,7 @@ plugins {
     val dokka_version = "0.10.0"
 
     application
-    maven
+    `maven-publish`
     kotlin("jvm")
     kotlin("kapt")
     id("io.spring.dependency-management")
@@ -16,7 +16,7 @@ plugins {
     id("com.vanniktech.dependency.graph.generator") version "0.5.0"
 }
 
-version = "1.5.4"
+version = "1.6.0"
 group = "hal.spel"
 
 val kotlinVersion: String by project
@@ -100,26 +100,47 @@ val sourcesJar = task<Jar>("sourcesJar") {
     from(sourceSets["main"].allSource)
 }
 
-task("writeNewPom") {
-    group = "build"
+//task("writeNewPom") {
+//    group = "build"
+//
+//    doLast {
+//        maven.pom {
+//            withGroovyBuilder {
+//                "project" {
+//                    setProperty("inceptionYear", "2019")
+//                    "licenses" {
+//                        "license" {
+//                            setProperty("name", "The Apache Software License, Version 2.0")
+//                            setProperty("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+//                            setProperty("distribution", "repo")
+//                        }
+//                    }
+//                }
+//            }
+//        }.writeTo("$buildDir/libs/${project.name}-${version}.pom")
+//    }
+//}
 
-    doLast {
-        maven.pom {
-            withGroovyBuilder {
-                "project" {
-                    setProperty("inceptionYear", "2019")
-                    "licenses" {
-                        "license" {
-                            setProperty("name", "The Apache Software License, Version 2.0")
-                            setProperty("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
-                            setProperty("distribution", "repo")
-                        }
+publishing {
+    publications {
+        create<MavenPublication>("HALSpeL") {
+            pom {
+                properties.set(mapOf(
+                        "inceptionYear" to "2019"
+                ))
+                licenses {
+                    license {
+                        name.set("The Apache Software License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        distribution.set("repo")
                     }
                 }
             }
-        }.writeTo("$buildDir/libs/${project.name}-${version}.pom")
+        }
     }
 }
+
+//generatePomFileForHALSpeLPublication
 
 val dokka: DokkaTask by tasks
 dokka.apply {

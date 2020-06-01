@@ -5,12 +5,13 @@ import hal.spel.HalKt;
 import hal.spel.Link;
 import hal.spel.Resource;
 import hal.spel.aspect.ADocTagAspectKt;
-import hal.spel.aspect.POST_PARTS;
-import hal.spel.aspect.PRE_PARTS;
+import hal.spel.aspect.ADocTagFormatter;
+import hal.spel.aspect.ReportPart;
 import io.micronaut.http.MediaType;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function2;
 
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +33,7 @@ class OxfordJ {
     };
 
     static public void main(String... args) {
-        PRE_PARTS[] preParts = new PRE_PARTS[]{PRE_PARTS.REL, PRE_PARTS.LINK};
+        ReportPart[] preParts = new ReportPart[]{ReportPart.REL, ReportPart.LINK};
 
         Link entrance = HalKt.halSpeL("/"
                 , MediaType.APPLICATION_HAL_JSON
@@ -40,7 +41,7 @@ class OxfordJ {
         );
         Resource resource = HalKt.FETCH(entrance, Collections.emptyMap(), null
                 , ADocTagAspectKt.makePostADocTagAspect(reporter
-                        , POST_PARTS.values()
+                        , ReportPart.values()
                         , ADocTagAspectKt.makePreADocTagAspect(reporter, preParts, aspect))
                 , null
         );
@@ -48,9 +49,7 @@ class OxfordJ {
         resource.FETCH("app:contacts");
 
         resource = HalKt.FETCH(entrance, Collections.emptyMap(), null
-                , ADocTagAspectKt.makePostADocTagAspect(reporter
-                        , POST_PARTS.values()
-                        , ADocTagAspectKt.makePreADocTagAspect(reporter, preParts, aspect))
+                , (new ADocTagFormatter(new PrintWriter(System.out), ReportPart.values(), null)).makeAspect(aspect)
                 , null
         );
 
