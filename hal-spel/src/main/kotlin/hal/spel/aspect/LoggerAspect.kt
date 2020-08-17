@@ -50,7 +50,9 @@ class LoggerFormatter(private val reporter: (String) -> Unit, vararg val parts: 
             ReportPart.TYPE to Pair<LinkFun?, AnswerFun?>({ reporter("Accept: $type") }, null),
             ReportPart.URL to Pair<LinkFun?, AnswerFun?>(null, { reporter("Resource Location: ${it.response.url}") }),
             ReportPart.CURL to Pair<LinkFun?, AnswerFun?>(null, { answer ->
-                if (answer.request.method == Method.GET || answer.request.header(Headers.CONTENT_TYPE).contains("json")) {
+                if (answer.request.method == Method.GET || answer.request.header(Headers.CONTENT_TYPE).any {
+                            it.contains("json", true)
+                        }) {
                     reporter("$> ${answer.request.cUrlString()}")
                 }
             }),
@@ -127,7 +129,9 @@ private val preLoggerFormatter = mapOf<ReportPart, (Link, (String) -> Unit) -> U
 private val postLoggerFormatter = mapOf<ReportPart, (Answer, (String) -> Unit) -> Unit>(
         ReportPart.URL to { answer, reporter -> reporter("Resource Location: ${answer.response.url}") },
         ReportPart.CURL to { answer, reporter ->
-            if (answer.request.method == Method.GET || answer.request.header(Headers.CONTENT_TYPE).contains("json")) {
+            if (answer.request.method == Method.GET || answer.request.header(Headers.CONTENT_TYPE).any {
+                        it.contains("json", true)
+                    }) {
                 reporter("$> ${answer.request.cUrlString()}")
             }
         },
