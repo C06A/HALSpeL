@@ -15,7 +15,7 @@ data class Link(
         val href: String
         , val templated: Boolean? = null
         , val type: String? = null
-        , val description: String? = null
+        , val deprecation: String? = null
         , val name: String? = null
         , val profile: String? = null
         , val title: String? = null
@@ -26,7 +26,7 @@ data class Link(
             kotON["href"]<String>() ?: throw Exception("The \"href\" field is required for Link.")
             , kotON<Boolean>("templated")
             , kotON<String>("type")
-            , kotON<String>("description")
+            , kotON<String>("deprecation")
             , kotON<String>("name")
             , kotON<String>("profile")
             , kotON<String>("title")
@@ -41,7 +41,7 @@ data class Link(
                 "href" to href
                 , "templated" to templated
                 , "type" to type
-                , "description" to description
+                , "deprecation" to deprecation
                 , "name" to name
                 , "profile" to profile
                 , "title" to title
@@ -63,6 +63,12 @@ data class Link(
 
     infix fun String.conveys(value: Any?) {
         parameters[this] = value
+    }
+
+    fun deprecation(): Link? {
+        return deprecation?.let {
+            Link(deprecation) // , type = "")
+        }
     }
 
     fun GET(vararg params: Pair<String, Any?>, headers: Headers? = null): Answer {
