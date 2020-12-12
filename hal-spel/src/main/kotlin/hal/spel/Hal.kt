@@ -692,7 +692,11 @@ class Answer(
                             throw InvalidPropertiesFormatException(e)
                         }
                     } ?: failure?.let {
-                        jackson.readValue(String(failure.errorData), Any::class.java)
+                        if (response.headers["Content-Type"].any { it.contains("json") }) {
+                            jackson.readValue(String(failure.errorData), Any::class.java)
+                        } else {
+                            failure.errorData
+                        }
                     } ?: ""
             )
         }

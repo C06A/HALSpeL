@@ -45,9 +45,11 @@ dependencies {
     compile("io.micronaut.configuration:micronaut-picocli")
     compile("io.micronaut:micronaut-http-server-netty")
 
+    compile("com.helpchoice.kotlin:koton:1.1.6")
+
     compile(project(":fuel-spel"))
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.6.0")
+    compile("hal.spel:hal-spel:1.7.0")
 
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")

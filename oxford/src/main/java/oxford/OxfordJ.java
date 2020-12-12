@@ -21,7 +21,7 @@ class OxfordJ {
 
     static Function2<? super Link, ? super Function1<? super Link, Answer>, Answer> aspect = (link, aspect) -> {
         Link newLink = new Link(entry + link.getHref(), link.getTemplated(), link.getType()
-                , link.getDescription(), link.getName(), link.getProfile()
+                , link.getDeprecation(), link.getName(), link.getProfile()
                 , link.getTitle(), link.getHreflang(), link.getRel());
         return aspect.invoke(newLink);
     };

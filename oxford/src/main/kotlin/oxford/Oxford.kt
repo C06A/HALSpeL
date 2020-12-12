@@ -55,7 +55,8 @@ class Oxford {
 
                 FETCH(aspect = makePostADocTagAspect(reporter
                         , *POST_PARTS.values()
-                        , aspect = makePreADocTagAspect(reporter, PRE_PARTS.REL, PRE_PARTS.LINK, aspect = aspect))
+                        , aspect = makePreADocTagAspect(reporter, PRE_PARTS.REL, PRE_PARTS.LINK
+                        , aspect = aspect))
                 ).apply {
                     FETCH("app:courses"
                     ).apply {

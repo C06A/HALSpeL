@@ -40,9 +40,9 @@ enum class ReportPart {
     BODY_IN
 }
 
-@Deprecated("Temporary aliases for backward compatibility. Use REPORT_PART instead")
+@Deprecated("Temporary aliases for backward compatibility. Use `ReportPart` instead")
 typealias PRE_PARTS = ReportPart
-@Deprecated("Temporary aliases for backward compatibility. Use REPORT_PART instead")
+@Deprecated("Temporary aliases for backward compatibility. Use `ReportPart` instead")
 typealias POST_PARTS = ReportPart
 
 /**
@@ -200,7 +200,16 @@ open class AspectMaker(private val preFuncs: List<LinkAspect> = emptyList(), pri
     }
 }
 
+/**
+ * This abstract class can be used to build different aspects to format request/response into different targets.
+ */
 abstract class AspectFormatter(private val followed: AspectFormatter? = null) {
+    /**
+     * This function builds an aspect function, which wraps around provided aspect.
+     * <p/>
+     * The child class should override this function to format Link/Answer on its own way and should call this
+     * function to wrap around parameter.
+     */
     open fun makeAspect(aspect: Aspect? = null): Aspect {
         return makeDefaultAspectIfNull(followed?.makeAspect(aspect) ?: aspect)
     }

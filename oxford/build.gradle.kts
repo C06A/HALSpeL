@@ -49,9 +49,11 @@ dependencies {
     compile("io.micronaut:micronaut-http-server-netty")
     compile("org.slf4j:slf4j-api:1.7.25")
 
+    compile("com.helpchoice.kotlin:koton:1.1.6")
+
     compile(project(":fuel-spel"))
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.6.0")
+    compile("hal.spel:hal-spel:1.7.0")
 
     compileOnly("io.micronaut:micronaut-inject-groovy")
     implementation("io.micronaut:micronaut-runtime-groovy")

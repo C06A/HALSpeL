@@ -5,7 +5,8 @@ import io.micronaut.http.HttpStatus
 
 fun main(vararg args: String) {
 
-    halSpeL("https://api.myip.com").GET().apply {
+    halSpeL("https://api.myip.com"
+    ).GET().apply {
         println("URL: ${request.url}")
         println(status.code)
         println(body?.invoke())

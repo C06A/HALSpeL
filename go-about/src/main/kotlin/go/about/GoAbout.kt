@@ -26,36 +26,15 @@ class GoAbout {
         "SSL".configSslTrust()
         null.configAsHostnameVerifier()
 
-        val aopLog: (Link.(Link.() -> Answer) -> Answer) = {
-            println()
-            if (name.isNullOrBlank()) {
-                println("Link href: $href")
-            } else {
-                println("Link name: $name ($href)")
-            }
-            it().apply {
-                println(request.cUrlString())
-                println("Status: ${status.code} ($status)")
-                when (status.code) {
-                    in (200..299) -> println("Body:\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(body)}")
-                    HttpStatus.FOUND.code -> {
-                        println("Redirection to: ${this.response.header("Location").first()}")
-                    }
-                    else -> {
-                        println("Body: $body")
-                    }
-                }
-            }
-        }
-
         halSpeL("https://api.goabout.com", rel = "entry")
-                .FETCH(aspect = makePostLoggerAspect(reporter
-                        , *(ReportPart.values().filter { it == ReportPart.BODY_OUT }.toTypedArray())
-                        , aspect = makePreLoggerAspect(reporter, *ReportPart.values())))
-                .apply {
+                .FETCH(aspect = LoggerFormatter(log::info, *(ReportPart.values())).makeAspect()
+                ).apply {
                     println("\nVersion: ${this["version"]()}. Build: ${this["build"]()}")
-//                    FETCH("http://openid.net/specs/connect/1.0/issuer")
+
+                    FETCH("http://openid.net/specs/connect/1.0/issuer")
+
                     FETCH("http://rels.goabout.com/feedback")
+
                     FETCH("http://rels.goabout.com/health")
                             .apply {
                                 println("Status: ${this["status"]<String>()}")
