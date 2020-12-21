@@ -149,7 +149,7 @@ class Resource(
     )
 
     fun embeddedList(rel: String): List<Resource>? {
-        koton[RESOURCES, rel]?.let {
+        koton[RESOURCES, rel].let {
             return when (it.size()) {
                 0 -> null
                 1 -> listOf(Resource(it, aspect))
