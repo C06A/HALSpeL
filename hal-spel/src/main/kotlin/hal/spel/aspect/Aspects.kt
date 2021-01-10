@@ -5,11 +5,8 @@ import hal.spel.Link
 
 
 typealias Aspect = Link.(Link.() -> Answer) -> Answer
-typealias LinkFun = Link.() -> Unit
+typealias LinkFun = Link.() -> Link
 typealias AnswerFun = (Answer) -> Unit
-
-typealias LinkAspect = Link.() -> Link
-typealias AnswerAspect = (Answer) -> Answer
 
 /**
  * Supplies the default Aspect if parameter is **null**
@@ -52,10 +49,9 @@ typealias POST_PARTS = ReportPart
  */
 fun makePreFunctionAspect(vararg func: LinkFun, aspect: Aspect?): Aspect {
     return {
-        func.forEach { reporter ->
-            reporter()
-        }
-        makeDefaultAspectIfNull(aspect)(it)
+        func.fold(this) { link, reporter ->
+            link.reporter()
+        }.(makeDefaultAspectIfNull(aspect))(it)
     }
 }
 
@@ -90,10 +86,9 @@ fun makeFunctionAspect(vararg func: Pair<LinkFun?, AnswerFun?>?, aspect: Aspect?
     return {
         func.map { pair ->
             pair?.first
-        }.filterIsInstance<LinkFun>().forEach { reporter ->
-            reporter()
-        }
-        makeDefaultAspectIfNull(aspect)(it).apply {
+        }.filterIsInstance<LinkFun>().fold(this) { link, reporter ->
+            link.reporter()
+        }.(makeDefaultAspectIfNull(aspect))(it).apply {
             func.map {pair ->
                 pair?.second }.filterIsInstance<AnswerFun>().forEach { reporter ->
                 reporter(this)
@@ -115,13 +110,13 @@ fun makeFunctionAspect(vararg func: Pair<LinkFun?, AnswerFun?>?, aspect: Aspect?
  * @param aspect -- the **Aspect** to chain from this or null if nothing
  */
 fun makePreReporterAspect(reporter: (String) -> Unit
-                          , definitions: Map<ReportPart, (Link, (String) -> Unit) -> Unit>
+                          , definitions: Map<ReportPart, (Link, (String) -> Unit) -> Link>
                           , vararg parts: ReportPart
                           , aspect: Aspect? = null): Aspect {
     return makePreFunctionAspect(
             *(parts.map {
                 { link: Link ->
-                    definitions[it]?.invoke(link, reporter) ?: Unit
+                    definitions[it]?.invoke(link, reporter) ?: link
                 }
             }.toTypedArray())
             , aspect = makeDefaultAspectIfNull(aspect)
@@ -176,29 +171,29 @@ fun makeReporterAspect(definitions: Map<ReportPart, Pair<LinkFun?, AnswerFun?>>
     )
 }
 
-open class AspectMaker(private val preFuncs: List<LinkAspect> = emptyList(), private val postFuncs: List<AnswerAspect> = emptyList()) {
-    var pre: LinkFun = {}
-        set(value) {
-            preFuncs + value
-        }
-
-    var post: AnswerFun = {}
-        set(value) {
-            postFuncs + value
-        }
-
-    fun makeAspect(aspect: Aspect?): Aspect {
-        return {
-            preFuncs.fold(this) { acc: Link, current: LinkAspect ->
-                acc.current()
-            }.run {
-                postFuncs.foldRight(makeDefaultAspectIfNull(aspect)(it)) { current, acc ->
-                    current(acc)
-                }
-            }
-        }
-    }
-}
+//open class AspectMaker(private val preFuncs: List<LinkAspect> = emptyList(), private val postFuncs: List<AnswerAspect> = emptyList()) {
+//    var pre: LinkFun = {}
+//        set(value) {
+//            preFuncs + value
+//        }
+//
+//    var post: AnswerFun = {}
+//        set(value) {
+//            postFuncs + value
+//        }
+//
+//    fun makeAspect(aspect: Aspect?): Aspect {
+//        return {
+//            preFuncs.fold(this) { acc: Link, current: LinkAspect ->
+//                acc.current()
+//            }.run {
+//                postFuncs.foldRight(makeDefaultAspectIfNull(aspect)(it)) { current, acc ->
+//                    current(acc)
+//                }
+//            }
+//        }
+//    }
+//}
 
 /**
  * This abstract class can be used to build different aspects to format request/response into different targets.

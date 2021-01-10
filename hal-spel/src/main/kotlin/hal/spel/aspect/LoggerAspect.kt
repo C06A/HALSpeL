@@ -42,6 +42,7 @@ class LoggerFormatter(
             ReportPart.values().forEach { part ->
                 it[part] = Pair<LinkFun?, AnswerFun?>({
                     preLoggerFormatter[part]?.invoke(this, reporter)
+                    this
                 }, {
                     postLoggerFormatter[part]?.invoke(it, reporter)
                 })
@@ -53,9 +54,10 @@ class LoggerFormatter(
     }
 }
 
-private val preLoggerFormatter = mapOf<ReportPart, (Link, (String) -> Unit) -> Unit>(
+private val preLoggerFormatter = mapOf<ReportPart, (Link, (String) -> Unit) -> Link>(
     ReportPart.REL to { link, reporter ->
         reporter(">>> ${link.rel} <<<")
+        link
     },
     ReportPart.LINK to { link, reporter ->
         reporter(
@@ -65,11 +67,12 @@ private val preLoggerFormatter = mapOf<ReportPart, (Link, (String) -> Unit) -> U
                 "Link name: ${link.name} (${link.href})"
             }
         )
+        link
     },
-    ReportPart.URI to { link, reporter -> reporter("URL: ${link.href}") },
-    ReportPart.NAME to { link, reporter -> reporter("Named: ${link.name}") },
-    ReportPart.TITLE to { link, reporter -> reporter("Titled: ${link.title}") },
-    ReportPart.TYPE to { link, reporter -> reporter("Accept: ${link.type}") }
+    ReportPart.URI to { link, reporter -> reporter("URL: ${link.href}"); link },
+    ReportPart.NAME to { link, reporter -> reporter("Named: ${link.name}"); link },
+    ReportPart.TITLE to { link, reporter -> reporter("Titled: ${link.title}"); link },
+    ReportPart.TYPE to { link, reporter -> reporter("Accept: ${link.type}"); link }
 )
 
 private val postLoggerFormatter = mapOf<ReportPart, (Answer, (String) -> Unit) -> Unit>(

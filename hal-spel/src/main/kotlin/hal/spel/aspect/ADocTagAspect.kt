@@ -40,6 +40,7 @@ class ADocTagFormatter(
         ReportPart.values().forEach { part ->
             it[part] = Pair<LinkFun?, AnswerFun?>({
                 preADocTagFormatter[part]?.invoke(this, reporter::println)
+                this
             }, {
                 postADocTagFormatter[part]?.invoke(it, reporter::println)
             })
@@ -53,31 +54,22 @@ class ADocTagFormatter(
 }
 
 private fun <T> formatTag(tagName: String, obj: T?, reporter: (String) -> Unit) {
-    when (obj) {
-        is Map<*, *> -> reporter("""
-                |#tag::$relation-$tagName-${counters[relation]}[]
-                |${
-            obj.filterValues { it != null }.map { (key, value) ->
+    reporter("""
+    |#tag::$relation-$tagName-${counters[relation]}[]
+        |${
+        when (obj) {
+            is Map<*, *> -> obj.filterValues {
+                it != null
+            }.map { (key, value) ->
                 "$key:\t$value"
             }.joinToString("\n|\t", "\t")
+            is Collection<*> -> obj.joinToString("\n|\t", "\t")
+            else -> obj ?: ""
         }
-                |#end::$relation-$tagName-${counters[relation]}[]
-                """.trimMargin()
-        )
-        is Collection<*> ->
-            reporter(
-                """
-                |#tag::$relation-$tagName-${counters[relation]}[]
-                |${obj.joinToString("\n|\t", "\t")}
-                |#end::$relation-$tagName-${counters[relation]}[]
-                """.trimMargin()
-            )
-        else -> reporter(
-            "#tag::$relation-$tagName-${counters[relation]}[]"
-                    + "\n${obj ?: ""}"
-                    + "\n#end::$relation-$tagName-${counters[relation]}[]"
-        )
     }
+    |#end::$relation-$tagName-${counters[relation]}[]
+    """.trimMargin()
+    )
 }
 
 /**
@@ -92,7 +84,7 @@ private fun <T> formatTag(tagName: String, obj: T?, reporter: (String) -> Unit) 
  *
  *
  */
-private val preADocTagFormatter = mapOf<ReportPart, (Link, (String) -> Unit) -> Unit>(
+private val preADocTagFormatter = mapOf<ReportPart, (Link, (String) -> Unit) -> Link>(
     ReportPart.REL to { link, reporter ->
         // Assign next available number to make a unique AsciiDoc tag
         relation = link.rel?.apply {
@@ -101,21 +93,27 @@ private val preADocTagFormatter = mapOf<ReportPart, (Link, (String) -> Unit) -> 
             } ?: 1
         }
         formatTag("ref", link.rel, reporter)
+        link
     },
     ReportPart.LINK to { link, reporter ->
         formatTag("link", link.toMap(), reporter)
+        link
     },
     ReportPart.URI to { link, reporter ->
         formatTag("URI", link.href, reporter)
+        link
     },
     ReportPart.NAME to { link, reporter ->
         formatTag("name", link.name, reporter)
+        link
     },
     ReportPart.TITLE to { link, reporter ->
         formatTag("title", link.title, reporter)
+        link
     },
     ReportPart.TYPE to { link, reporter ->
         formatTag("type", link.type, reporter)
+        link
     }
 )
 
@@ -149,19 +147,18 @@ private val postADocTagFormatter = mapOf<ReportPart, (Answer, (String) -> Unit) 
                 Method.PATCH
             ) && !answer.request.body.isConsumed()
         ) {
-            formatTag("bodyOut", {
+            formatTag(
+                "bodyOut",
                 if (answer.request.body.isConsumed()) {
                     "Length of the sent Body: ${answer.request.body.length}"
                 } else {
-                    "Body sent:\n${
-                        if (answer.request.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
-                            jackson.writerWithDefaultPrettyPrinter().writeValueAsString(answer.body?.invoke())
-                        } else {
-                            answer.request.body.asString(null)
-                        }
-                    }"
-                }
-            }, reporter)
+                    if (answer.request.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
+                        jackson.writerWithDefaultPrettyPrinter().writeValueAsString(answer.body?.invoke())
+                    } else {
+                        answer.request.body.asString(null)
+                    }
+                }, reporter
+            )
         } else {
             formatTag("bodyOut", "*** Cannot report body sent out ***", reporter)
         }
@@ -178,23 +175,18 @@ private val postADocTagFormatter = mapOf<ReportPart, (Answer, (String) -> Unit) 
     ReportPart.BODY_IN to { answer, reporter ->
         formatTag(
             "bodyIn",
-            "Body received:${
-                when (answer.status.code) {
-                    HttpStatus.FOUND.code -> "Redirection to: ${answer.response.header("Location").first()}"
-                    else ->
-                        if (answer.response.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
-                            "\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(answer.body?.invoke())}"
-                        } else {
-                            val head = min(answer.response.contentLength, UNSTRUCTURED_HEAD_LENGTH)
-                            " (length: ${answer.response.contentLength})\n${
-                                String(answer.response.data).substring(
-                                    0,
-                                    head.toInt()
-                                )
-                            }"
-                        }
-                }
-            }", reporter
+            when (answer.status.code) {
+                HttpStatus.FOUND.code -> "Redirection to: ${answer.response.header("Location").first()}"
+                else ->
+                    if (answer.response.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
+                        jackson.writerWithDefaultPrettyPrinter().writeValueAsString(answer.body?.invoke())
+                    } else {
+                        val head = min(answer.response.contentLength, UNSTRUCTURED_HEAD_LENGTH)
+                        """ (length: ${answer.response.contentLength})
+                           |${String(answer.response.data).substring(0, head.toInt())}
+                        """.trimMargin()
+                    }
+            }, reporter
         )
     }
 )

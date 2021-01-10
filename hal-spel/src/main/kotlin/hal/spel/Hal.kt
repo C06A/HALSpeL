@@ -36,7 +36,7 @@ private val SIMPLE_ASPECT: Link.(Link.() -> Answer) -> Answer = { it() }
 fun Link.FETCH(
         vararg params: Pair<String, Any?>
         , headers: Headers? = null
-        , aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
+        , aspect: Aspect = SIMPLE_ASPECT
         , tail: (Answer.() -> Unit)? = null
 ): Resource {
     return FETCH(params.toMap(), headers, aspect, tail)
@@ -90,7 +90,7 @@ fun Link.CREATE(
         vararg params: Pair<String, Any?>
         , headers: Headers? = null
         , body: String = ""
-        , aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
+        , aspect: Aspect = SIMPLE_ASPECT
         , tail: (Answer.() -> Unit)? = null
 ): Resource? {
     return CREATE(params.toMap(), headers, body, aspect, tail)
@@ -114,7 +114,7 @@ fun Link.CREATE(
         params: Map<String, Any?> = emptyMap()
         , headers: Headers? = null
         , body: String = ""
-        , aspect: (Link.(Link.() -> Answer) -> Answer) = SIMPLE_ASPECT
+        , aspect: Aspect = SIMPLE_ASPECT
         , tail: (Answer.() -> Unit)? = null
 ): Resource? {
     val answer = aspect {
@@ -137,7 +137,7 @@ fun Link.CREATE(
  */
 class Resource(
         val koton: KotON<*>
-        , var aspect: (Link.(Link.() -> Answer) -> Answer)? = null
+        , var aspect: Aspect? = null
 ) {
     constructor(koton: KotON<*>, formatter: AspectFormatter) : this(koton, formatter.makeAspect())
 
@@ -260,7 +260,7 @@ class Resource(
     fun FETCH(link: String? = null, index: Int
               , vararg params: Pair<String, Any?>
               , headers: Headers? = null
-              , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+              , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return FETCH(link, index, params.toMap(), headers, aspect, tail)
     }
@@ -279,7 +279,7 @@ class Resource(
     fun FETCH(link: String? = null
               , vararg params: Pair<String, Any?>
               , headers: Headers? = null
-              , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+              , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return FETCH(link, null, params.toMap(), headers, aspect, tail)
     }
@@ -298,7 +298,7 @@ class Resource(
     fun FETCH(link: String? = null, index: Int? = null
               , params: Map<String, Any?>
               , headers: Headers? = null
-              , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+              , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return LINK(link ?: "self", index).FETCH(params, headers = headers, aspect = aspect, tail = tail)
     }
@@ -318,7 +318,7 @@ class Resource(
     fun CREATE(link: String? = null
                , vararg params: Pair<String, Any?>
                , body: KotON<*>, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return CREATE(link, params.toMap(), body.toJson(), headers, aspect, tail)
     }
@@ -338,7 +338,7 @@ class Resource(
     fun CREATE(link: String? = null
                , vararg params: Pair<String, Any?>
                , body: String, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return CREATE(link, params.toMap(), body, headers, aspect, tail)
     }
@@ -358,7 +358,7 @@ class Resource(
     fun CREATE(link: String? = null
                , params: Map<String, Any?>
                , body: KotON<*>, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return LINK(link ?: "self")
                 .let {
@@ -385,7 +385,7 @@ class Resource(
     fun CREATE(link: String? = null
                , params: Map<String, Any?>
                , body: String, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return LINK(link ?: "self")
                 .let {
@@ -414,7 +414,7 @@ class Resource(
                , params: Map<String, Any?>
                , source: BodySource, length: BodyLength
                , headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return LINK(link ?: "self")
                 .let {
@@ -441,7 +441,7 @@ class Resource(
     fun REPLACE(link: String? = null
                 , vararg params: Pair<String, Any?>
                 , body: KotON<*>, headers: Headers? = null
-                , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+                , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return REPLACE(link, *params, body = body.toJson(), headers = headers, aspect = aspect, tail = tail)
     }
@@ -461,7 +461,7 @@ class Resource(
     fun REPLACE(link: String? = null
                 , vararg params: Pair<String, Any?>
                 , body: String, headers: Headers? = null
-                , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+                , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return LINK(link ?: "self")
                 .let {
@@ -490,7 +490,7 @@ class Resource(
                 , vararg params: Pair<String, Any?>
                 , source: BodySource, length: BodyLength
                 , headers: Headers? = null
-                , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+                , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return LINK(link ?: "self")
                 .let {
@@ -517,7 +517,7 @@ class Resource(
     fun CREATE(link: String? = null
                , vararg params: Pair<String, Any?>
                , file: File, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return CREATE(link, *params, files = mapOf(file to file.name), headers = headers, aspect = aspect, tail = tail)
     }
@@ -538,7 +538,7 @@ class Resource(
                , vararg params: Pair<String, Any?>
                , files: Collection<File>
                , headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return CREATE(link, *params, files = files.map {
             it to it.name
@@ -561,7 +561,7 @@ class Resource(
                , vararg params: Pair<String, Any?>
                , files: Map<File, String>
                , headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
 //        return PLACE(link, params.toMap(), files, tail)
 //    }
@@ -592,7 +592,7 @@ class Resource(
     fun UPDATE(link: String? = null
                , params: Map<String, Any?> = emptyMap()
                , body: KotON<*>, headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return LINK(link ?: "self")
                 .let {
@@ -620,7 +620,7 @@ class Resource(
               , vararg params: Pair<String, Any?>
               , folder: File
               , headers: Headers? = null
-              , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+              , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         val linkObject = LINK(link)
         linkObject.let {
@@ -649,7 +649,7 @@ class Resource(
     fun REMOVE(link: String? = null
                , params: Map<String, Any?> = emptyMap()
                , headers: Headers? = null
-               , aspect: (Link.(Link.() -> Answer) -> Answer)? = this.aspect, tail: (Answer.() -> Unit)? = null
+               , aspect: Aspect? = this.aspect, tail: (Answer.() -> Unit)? = null
     ): Resource {
         return LINK(link ?: "self")
                 .let {
