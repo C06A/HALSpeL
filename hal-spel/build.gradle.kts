@@ -16,7 +16,7 @@ plugins {
     id("com.vanniktech.dependency.graph.generator") version "0.5.0"
 }
 
-version = "1.7.2"
+version = "1.7.3"
 group = "hal.spel"
 
 val kotlinVersion: String by project

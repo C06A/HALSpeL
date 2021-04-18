@@ -115,9 +115,10 @@ fun makePreReporterAspect(reporter: (String) -> Unit
                           , aspect: Aspect? = null): Aspect {
     return makePreFunctionAspect(
             *(parts.map {
-                { link: Link ->
-                    definitions[it]?.invoke(link, reporter) ?: link
+                val linkFun: LinkFun = {
+                    definitions[it]?.invoke(this, reporter) ?: this
                 }
+                linkFun
             }.toTypedArray())
             , aspect = makeDefaultAspectIfNull(aspect)
     )

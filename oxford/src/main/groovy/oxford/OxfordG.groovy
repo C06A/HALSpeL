@@ -17,9 +17,14 @@ class OxfordG {
 
     static Function2<? super Link, ? super Function1<? super Link, Answer>, Answer> aspect = { link, aspect ->
         Link newLink = new Link(entry + link.href
-                , link.templated, link.type
-                , link.getDescription(), link.getName(), link.getProfile()
-                , link.getTitle(), link.getHreflang(), link.getRel())
+                , link.templated
+                , link.type
+                , link.deprecation
+                , link.getName()
+                , link.getProfile()
+                , link.getTitle()
+                , link.getHreflang()
+                , link.getRel())
         return aspect.invoke(newLink)
     }
 

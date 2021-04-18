@@ -8,6 +8,7 @@ import com.github.kittinunf.fuel.core.requests.RepeatableBody
 import hal.spel.Answer
 import hal.spel.Link
 import io.micronaut.http.HttpStatus
+import io.micronaut.http.MediaType
 import java.io.PrintWriter
 import kotlin.math.min
 
@@ -54,22 +55,31 @@ class ADocTagFormatter(
 }
 
 private fun <T> formatTag(tagName: String, obj: T?, reporter: (String) -> Unit) {
-    reporter("""
-    |#tag::$relation-$tagName-${counters[relation]}[]
-        |${
-        when (obj) {
-            is Map<*, *> -> obj.filterValues {
-                it != null
-            }.map { (key, value) ->
+    when (obj) {
+        is Map<*, *> -> reporter("""
+                |#tag::$relation-$tagName-${counters[relation]}[]
+                |${
+            obj.filterValues { it != null }.map { (key, value) ->
                 "$key:\t$value"
             }.joinToString("\n|\t", "\t")
-            is Collection<*> -> obj.joinToString("\n|\t", "\t")
-            else -> obj ?: ""
         }
+                |#end::$relation-$tagName-${counters[relation]}[]
+                """.trimMargin()
+        )
+        is Collection<*> ->
+            reporter(
+                """
+                |#tag::$relation-$tagName-${counters[relation]}[]
+                |${obj.joinToString("\n|\t", "\t")}
+                |#end::$relation-$tagName-${counters[relation]}[]
+                """.trimMargin()
+            )
+        else -> reporter(
+            "#tag::$relation-$tagName-${counters[relation]}[]"
+                    + "\n${obj ?: ""}"
+                    + "\n#end::$relation-$tagName-${counters[relation]}[]"
+        )
     }
-    |#end::$relation-$tagName-${counters[relation]}[]
-    """.trimMargin()
-    )
 }
 
 /**
@@ -145,20 +155,22 @@ private val postADocTagFormatter = mapOf<ReportPart, (Answer, (String) -> Unit) 
                 Method.POST,
                 Method.PUT,
                 Method.PATCH
-            ) && !answer.request.body.isConsumed()
+            )
         ) {
-            formatTag(
-                "bodyOut",
+            formatTag("bodyOut", {
                 if (answer.request.body.isConsumed()) {
                     "Length of the sent Body: ${answer.request.body.length}"
                 } else {
-                    if (answer.request.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
-                        jackson.writerWithDefaultPrettyPrinter().writeValueAsString(answer.body?.invoke())
-                    } else {
-                        answer.request.body.asString(null)
-                    }
-                }, reporter
-            )
+                    "Body sent:\n${
+                        if (answer.request.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
+                            jackson.writerWithDefaultPrettyPrinter(
+                            ).writeValueAsString(answer.request.body.asString(MediaType.APPLICATION_JSON))
+                        } else {
+                            answer.request.body.asString(null)
+                        }
+                    }"
+                }
+            }, reporter)
         } else {
             formatTag("bodyOut", "*** Cannot report body sent out ***", reporter)
         }
@@ -175,18 +187,23 @@ private val postADocTagFormatter = mapOf<ReportPart, (Answer, (String) -> Unit) 
     ReportPart.BODY_IN to { answer, reporter ->
         formatTag(
             "bodyIn",
-            when (answer.status.code) {
-                HttpStatus.FOUND.code -> "Redirection to: ${answer.response.header("Location").first()}"
-                else ->
-                    if (answer.response.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
-                        jackson.writerWithDefaultPrettyPrinter().writeValueAsString(answer.body?.invoke())
-                    } else {
-                        val head = min(answer.response.contentLength, UNSTRUCTURED_HEAD_LENGTH)
-                        """ (length: ${answer.response.contentLength})
-                           |${String(answer.response.data).substring(0, head.toInt())}
-                        """.trimMargin()
-                    }
-            }, reporter
+            "Body received:${
+                when (answer.status.code) {
+                    HttpStatus.FOUND.code -> "Redirection to: ${answer.response.header("Location").first()}"
+                    else ->
+                        if (answer.response.header(Headers.CONTENT_TYPE).any { it.contains("json") }) {
+                            "\n${jackson.writerWithDefaultPrettyPrinter().writeValueAsString(answer.body?.invoke())}"
+                        } else {
+                            val head = min(answer.response.contentLength, UNSTRUCTURED_HEAD_LENGTH)
+                            " (length: ${answer.response.contentLength})\n${
+                                String(answer.response.data).substring(
+                                    0,
+                                    head.toInt()
+                                )
+                            }"
+                        }
+                }
+            }", reporter
         )
     }
 )

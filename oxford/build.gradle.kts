@@ -53,7 +53,7 @@ dependencies {
 
     compile(project(":fuel-spel"))
 //    compile(project(":hal-spel"))
-    compile("hal.spel:hal-spel:1.7.2")
+    compile("hal.spel:hal-spel:1.7.3")
 
     compileOnly("io.micronaut:micronaut-inject-groovy")
     implementation("io.micronaut:micronaut-runtime-groovy")

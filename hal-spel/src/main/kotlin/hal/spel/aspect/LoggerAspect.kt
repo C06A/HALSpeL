@@ -106,7 +106,7 @@ private val postLoggerFormatter = mapOf<ReportPart, (Answer, (String) -> Unit) -
                 Method.POST,
                 Method.PUT,
                 Method.PATCH
-            ) && !answer.request.body.isConsumed()
+            )
         ) {
             reporter(
                 if (answer.request.body.isConsumed()) {
